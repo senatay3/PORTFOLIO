@@ -1,0 +1,1407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Portfolio Tracker</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Syne:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+:root{
+  --navy:#0b1623;--navy2:#11202f;--navy3:#182d42;--navy4:#1e3855;
+  --teal:#00d4aa;--teal2:#00b891;--teal3:rgba(0,212,170,0.12);
+  --amber:#f5a623;--amber2:rgba(245,166,35,0.13);
+  --red:#ff5c5c;--red2:rgba(255,92,92,0.13);
+  --green:#2ecc8f;--green2:rgba(46,204,143,0.13);
+  --purple:#8b7fff;--purple2:rgba(139,127,255,0.13);
+  --blue:#4da6ff;--blue2:rgba(77,166,255,0.13);
+  --white:#eef3f8;--muted:#6d8aa0;--muted2:#4a6478;
+  --border:rgba(255,255,255,0.06);--border2:rgba(255,255,255,0.1);
+  --card:rgba(255,255,255,0.03);--card2:rgba(255,255,255,0.055);
+  --sidebar-w:220px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden}
+body{background:var(--navy);color:var(--white);font-family:'Syne',sans-serif;display:flex}
+
+/* ── SIDEBAR ──────────────────────────────────── */
+.sidebar{
+  width:var(--sidebar-w);min-width:var(--sidebar-w);height:100vh;
+  background:var(--navy2);border-right:1px solid var(--border);
+  display:flex;flex-direction:column;overflow:hidden;z-index:10;
+  position:relative;
+}
+.sidebar::after{
+  content:'';position:absolute;top:0;right:0;bottom:0;width:1px;
+  background:linear-gradient(to bottom,transparent,var(--teal3),transparent);
+}
+.sb-logo{padding:1.4rem 1.2rem 1rem;border-bottom:1px solid var(--border)}
+.sb-logo h1{font-size:1.1rem;font-weight:800;letter-spacing:-.02em;line-height:1.1}
+.sb-logo h1 span{color:var(--teal)}
+.sb-logo p{font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);margin-top:4px;letter-spacing:.04em}
+.sb-section{padding:.7rem .8rem .3rem;font-family:'DM Mono',monospace;font-size:9px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted2)}
+.sb-nav{flex:1;overflow-y:auto;padding:.3rem .6rem .6rem}
+.sb-nav::-webkit-scrollbar{width:3px}
+.sb-nav::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+.sb-item{
+  display:flex;align-items:center;gap:9px;padding:9px 10px;
+  border-radius:8px;cursor:pointer;margin-bottom:2px;
+  font-size:13px;font-weight:600;color:var(--muted);
+  border:1px solid transparent;transition:all .15s;
+  user-select:none;
+}
+.sb-item:hover{background:var(--card2);color:var(--white)}
+.sb-item.active{background:var(--navy4);color:var(--white);border-color:var(--border2)}
+.sb-item .sb-icon{font-size:15px;width:18px;text-align:center;flex-shrink:0}
+.sb-item .sb-badge{margin-left:auto;background:var(--teal);color:var(--navy);font-family:'DM Mono',monospace;font-size:9px;font-weight:700;padding:1px 6px;border-radius:10px;min-width:18px;text-align:center}
+.sb-item .sb-badge.amber{background:var(--amber)}
+.sb-divider{height:1px;background:var(--border);margin:.5rem 0}
+.sb-bottom{padding:.8rem .6rem;border-top:1px solid var(--border)}
+.sb-export{
+  width:100%;padding:9px;background:var(--teal);color:var(--navy);
+  border:none;border-radius:8px;font-family:'Syne',sans-serif;
+  font-weight:700;font-size:12px;cursor:pointer;transition:all .15s;
+  display:flex;align-items:center;justify-content:center;gap:6px;
+}
+.sb-export:hover{background:var(--teal2)}
+.sb-load{
+  width:100%;padding:7px;background:transparent;color:var(--muted);
+  border:1px solid var(--border);border-radius:8px;font-family:'Syne',sans-serif;
+  font-weight:600;font-size:11px;cursor:pointer;transition:all .15s;margin-top:6px;
+  display:flex;align-items:center;justify-content:center;gap:6px;
+}
+.sb-load:hover{color:var(--white);border-color:var(--border2)}
+
+/* ── MAIN CONTENT ─────────────────────────────── */
+.main{flex:1;height:100vh;overflow-y:auto;display:flex;flex-direction:column}
+.main::-webkit-scrollbar{width:4px}
+.main::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+.topbar{
+  padding:1rem 1.8rem;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;
+  background:rgba(11,22,35,0.7);backdrop-filter:blur(12px);
+  position:sticky;top:0;z-index:5;flex-shrink:0;
+}
+.topbar-title{font-size:1rem;font-weight:700;letter-spacing:-.01em}
+.topbar-sub{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);margin-top:2px}
+.topbar-actions{display:flex;gap:8px;align-items:center}
+.content{padding:1.5rem 1.8rem;flex:1}
+
+/* ── PAGE VISIBILITY ─────────────────────────── */
+.page{display:none}.page.active{display:block}
+
+/* ── KPI STRIP ────────────────────────────────── */
+.kpi-strip{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:1.5rem}
+.fx-input-row{display:flex;align-items:center;gap:6px;font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);margin-top:4px}
+.fx-input-row input{width:55px;padding:2px 5px;font-size:10px}
+.kpi{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:.9rem 1rem;position:relative;overflow:hidden;cursor:default}
+.kpi::before{content:'';position:absolute;top:0;left:0;right:0;height:2px}
+.kpi.k0::before{background:var(--teal)}.kpi.k1::before{background:var(--green)}
+.kpi.k2::before{background:var(--amber)}.kpi.k3::before{background:var(--purple)}
+.kpi.k4::before{background:var(--blue)}
+.kpi-label{font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:5px}
+.kpi-val{font-size:1.3rem;font-weight:700;letter-spacing:-.02em;line-height:1}
+.kpi-val.pos{color:var(--green)}.kpi-val.neg{color:var(--red)}.kpi-val.neu{color:var(--white)}
+.kpi-sub{font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);margin-top:4px}
+
+/* ── SECTION CARD ─────────────────────────────── */
+.card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:1.3rem;margin-bottom:1.2rem}
+.card-title{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:1rem;display:flex;align-items:center;gap:8px}
+.card-title::after{content:'';flex:1;height:1px;background:var(--border)}
+
+/* ── BUTTONS ──────────────────────────────────── */
+.btn{font-family:'Syne',sans-serif;font-weight:600;font-size:12px;padding:7px 14px;border-radius:7px;border:1px solid var(--border);cursor:pointer;transition:all .15s;display:inline-flex;align-items:center;gap:5px;background:var(--card);color:var(--white);white-space:nowrap}
+.btn:hover{background:var(--card2);border-color:var(--border2)}
+.btn-teal{background:var(--teal);color:var(--navy);border-color:transparent}
+.btn-teal:hover{background:var(--teal2)}
+.btn-amber{background:var(--amber2);border-color:rgba(245,166,35,0.25);color:var(--amber)}
+.btn-amber:hover{background:rgba(245,166,35,0.22)}
+.btn-ghost{background:transparent;border-color:transparent;color:var(--muted);padding:5px 8px}
+.btn-ghost:hover{color:var(--red);background:var(--red2)}
+.btn-sm{padding:5px 10px;font-size:11px}
+
+/* ── FORM ELEMENTS ────────────────────────────── */
+.form-row{display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap;margin-bottom:1rem}
+.fg{display:flex;flex-direction:column;gap:5px}
+.fl{font-family:'DM Mono',monospace;font-size:9px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
+input[type=date],input[type=number],input[type=text],select{
+  background:var(--navy3);border:1px solid var(--border);border-radius:7px;
+  color:var(--white);font-family:'DM Mono',monospace;font-size:12px;
+  padding:6px 10px;outline:none;transition:border .15s;
+}
+input:focus,select:focus{border-color:rgba(0,212,170,0.45)}
+input[type=date]::-webkit-calendar-picker-indicator{filter:invert(1) opacity(.4);cursor:pointer}
+select option{background:var(--navy2)}
+input::placeholder{color:var(--muted2)}
+
+/* ── ENTRY TABLE ──────────────────────────────── */
+.tbl{width:100%;border-collapse:collapse}
+.tbl thead tr{border-bottom:1px solid var(--border)}
+.tbl th{font-family:'DM Mono',monospace;font-size:9px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);padding:0 8px 8px;text-align:right;font-weight:400}
+.tbl th:first-child{text-align:left}
+.tbl tbody tr{border-bottom:1px solid var(--border);transition:background .1s}
+.tbl tbody tr:last-child{border-bottom:none}
+.tbl tbody tr:hover{background:var(--card2)}
+.tbl td{padding:9px 8px;vertical-align:middle;font-size:12px}
+.tbl td:not(:first-child){text-align:right;font-family:'DM Mono',monospace}
+.inv-name{font-weight:600;font-size:13px}
+.inv-meta{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);margin-top:2px}
+.badge{display:inline-block;font-family:'DM Mono',monospace;font-size:9px;padding:1px 6px;border-radius:3px;font-weight:600}
+.badge-eur{background:var(--teal3);color:var(--teal)}
+.badge-ghs{background:var(--amber2);color:var(--amber)}
+.muted{color:var(--muted)}
+.pos{color:var(--green);font-weight:600}.neg{color:var(--red);font-weight:600}
+.val-input{width:95px;text-align:right}
+.chg-cell{font-size:11px;white-space:nowrap}
+
+/* ── WEEK SELECTOR ────────────────────────────── */
+.week-selector{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:1.2rem;align-items:center}
+.week-pill{
+  font-family:'DM Mono',monospace;font-size:11px;padding:5px 12px;
+  border-radius:20px;border:1px solid var(--border);cursor:pointer;
+  background:transparent;color:var(--muted);transition:all .15s;
+}
+.week-pill:hover{border-color:var(--border2);color:var(--white)}
+.week-pill.active{background:var(--navy4);border-color:var(--teal3);color:var(--teal)}
+.week-pill-label{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);margin-right:4px}
+
+/* ── WEEKLY DIFF TABLE ────────────────────────── */
+.diff-tbl{width:100%;border-collapse:collapse}
+.diff-tbl th{font-family:'DM Mono',monospace;font-size:9px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);padding:0 8px 8px;border-bottom:1px solid var(--border);text-align:right;font-weight:400}
+.diff-tbl th:first-child{text-align:left}
+.diff-tbl td{padding:9px 8px;border-bottom:1px solid var(--border);font-family:'DM Mono',monospace;font-size:12px;vertical-align:middle;text-align:right}
+.diff-tbl td:first-child{text-align:left;font-family:'Syne',sans-serif;font-weight:600;font-size:12px}
+.diff-tbl tr:last-child td{border-bottom:none}
+.diff-tbl tr:hover td{background:var(--card2)}
+.bar-wrap{display:flex;align-items:center;gap:6px;justify-content:flex-end}
+.mini-bar{height:4px;border-radius:2px;min-width:2px;max-width:60px}
+.mini-bar.pos{background:var(--green)}.mini-bar.neg{background:var(--red)}
+
+/* ── DEPOSIT LOG ──────────────────────────────── */
+.dep-row{display:grid;grid-template-columns:90px 1fr 90px 52px 100px 28px;gap:8px;align-items:center;padding:8px 0;border-bottom:1px solid var(--border);font-size:12px}
+.dep-row:last-child{border-bottom:none}
+.dep-hdr{font-family:'DM Mono',monospace;font-size:9px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);padding:0 0 6px;margin-bottom:2px;border-bottom:1px solid var(--border);display:grid;grid-template-columns:90px 1fr 90px 52px 100px 28px;gap:8px}
+
+/* ── HISTORY ──────────────────────────────────── */
+.hist-item{display:grid;grid-template-columns:90px 70px 1fr auto;gap:10px;align-items:start;padding:10px 0;border-bottom:1px solid var(--border)}
+.hist-item:last-child{border-bottom:none}
+.h-date{font-family:'DM Mono',monospace;font-size:11px;color:var(--teal);font-weight:500}
+.h-badge{font-family:'DM Mono',monospace;font-size:9px;padding:2px 7px;border-radius:3px;font-weight:700;text-align:center;width:fit-content}
+.h-badge.val{background:var(--teal3);color:var(--teal)}
+.h-badge.dep{background:var(--green2);color:var(--green)}
+.h-info{font-size:12px;color:var(--muted);line-height:1.5}
+.h-info strong{color:var(--white);font-size:13px}
+.h-chips{display:flex;flex-wrap:wrap;gap:3px;margin-top:4px}
+.h-chip{font-family:'DM Mono',monospace;font-size:9px;padding:1px 5px;background:var(--navy3);border-radius:3px;color:var(--muted)}
+.h-chip.d{background:var(--green2);color:var(--green)}
+
+/* ── PERFORMANCE PAGE ─────────────────────────── */
+.perf-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:1.2rem}
+.perf-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:1rem}
+.perf-name{font-weight:700;font-size:13px;margin-bottom:2px}
+.perf-meta{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);margin-bottom:.7rem}
+.perf-stat{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px}
+.perf-stat-label{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted)}
+.perf-stat-val{font-family:'DM Mono',monospace;font-size:12px;font-weight:600}
+.pct-bar{height:5px;background:var(--navy3);border-radius:3px;overflow:hidden;margin-top:.5rem}
+.pct-bar-fill{height:100%;border-radius:3px;transition:width .4s}
+
+/* ── ALERT BOX ────────────────────────────────── */
+.alert{padding:.8rem 1rem;border-radius:8px;font-size:12px;margin-bottom:1rem;display:flex;align-items:center;gap:8px}
+.alert-info{background:var(--blue2);border:1px solid rgba(77,166,255,0.2);color:var(--blue)}
+
+/* ── UPLOAD ZONE ──────────────────────────────── */
+.upload-zone{border:2px dashed rgba(0,212,170,0.18);border-radius:12px;padding:1.5rem;text-align:center;cursor:pointer;transition:all .2s;margin-bottom:1.2rem}
+.upload-zone:hover,.upload-zone.drag{border-color:var(--teal);background:rgba(0,212,170,0.03)}
+#file-input{display:none}
+
+/* ── PERIOD PILLS ─────────────────────────────── */
+.period-pills{display:flex;gap:4px;margin-bottom:1rem}
+.period-pill{padding:5px 14px;border-radius:6px;border:1px solid var(--border);font-family:'Syne',sans-serif;font-weight:600;font-size:11px;cursor:pointer;background:transparent;color:var(--muted);transition:all .15s}
+.period-pill.active{background:var(--navy4);color:var(--white);border-color:var(--border2)}
+
+/* ── PREVIEW BOX ──────────────────────────────── */
+.preview-box{padding:.75rem 1rem;background:var(--green2);border:1px solid rgba(46,204,143,0.2);border-radius:8px;font-family:'DM Mono',monospace;font-size:12px;display:none;margin-top:.8rem}
+
+/* ── STATUS DOT ───────────────────────────────── */
+.dot{width:6px;height:6px;border-radius:50%;display:inline-block;flex-shrink:0}
+.dot-green{background:var(--green);animation:pulse 2s infinite}
+.dot-amber{background:var(--amber)}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+
+/* ── TOAST ────────────────────────────────────── */
+#toast{position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%) translateY(16px);background:var(--teal);color:var(--navy);font-weight:700;font-size:12px;padding:9px 18px;border-radius:8px;opacity:0;transition:all .28s;pointer-events:none;z-index:999}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+#toast.err{background:var(--red);color:#fff}
+
+/* SCROLLBAR global */
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+
+@media(max-width:700px){
+  .sidebar{display:none}
+  .kpi-strip{grid-template-columns:repeat(2,1fr)}
+  .perf-grid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════════════════════════ SIDEBAR -->
+<aside class="sidebar">
+  <div class="sb-logo">
+    <h1>Portfolio<br><span>Tracker</span></h1>
+    <p>Double-click to open · No internet</p>
+  </div>
+  <div class="sb-nav" id="sb-nav">
+    <div class="sb-section">Overview</div>
+    <div class="sb-item active" data-page="dashboard" onclick="nav(this)">
+      <span class="sb-icon">📊</span> Dashboard
+    </div>
+    <div class="sb-item" data-page="performance" onclick="nav(this)">
+      <span class="sb-icon">🏆</span> Performance
+    </div>
+    <div class="sb-divider"></div>
+    <div class="sb-section">Log entries</div>
+    <div class="sb-item" data-page="valuations" onclick="nav(this)">
+      <span class="sb-icon">📈</span> Weekly Entry
+    </div>
+    <div class="sb-item" data-page="deposits" onclick="nav(this)">
+      <span class="sb-icon">💰</span> Log Deposit
+    </div>
+    <div class="sb-item" data-page="new-investment" onclick="nav(this)">
+      <span class="sb-icon">➕</span> New Investment
+    </div>
+    <div class="sb-divider"></div>
+    <div class="sb-section">Analytics</div>
+    <div class="sb-item" data-page="weekly-diff" onclick="nav(this)">
+      <span class="sb-icon">📅</span> Week-by-Week
+    </div>
+    <div class="sb-item" data-page="dep-history" onclick="nav(this)">
+      <span class="sb-icon">🧾</span> Deposit Log
+    </div>
+    <div class="sb-item" data-page="history" onclick="nav(this)">
+      <span class="sb-icon">🕓</span> Full History
+    </div>
+    <div class="sb-divider"></div>
+    <div class="sb-section">Totals</div>
+    <div class="sb-item" data-page="profits" onclick="nav(this)">
+      <span class="sb-icon">💹</span> Total Profits
+    </div>
+  </div>
+  <div class="sb-bottom">
+    <button class="sb-export" onclick="exportExcel()">↓ Download Excel</button>
+    <button class="sb-load" onclick="exportPDF()" style="margin-top:6px">▤ Download PDF summary</button>
+    <button class="sb-load" onclick="document.getElementById('file-input').click()" style="margin-top:6px">↑ Load Excel file</button>
+    <button class="sb-load" onclick="document.getElementById('csv-input').click()" style="margin-top:6px">↑ Import CSV (bulk)</button>
+    <input type="file" id="file-input" accept=".xlsx">
+    <input type="file" id="csv-input" accept=".csv">
+  </div>
+</aside>
+
+<!-- ══════════════════════════════════════════════════════════════ MAIN -->
+<div class="main">
+  <div class="topbar">
+    <div>
+      <div class="topbar-title" id="topbar-title">Dashboard</div>
+      <div class="topbar-sub" id="topbar-sub">Portfolio overview</div>
+    </div>
+    <div class="topbar-actions">
+      <span class="dot dot-green" id="status-dot"></span>
+      <span id="status-msg" style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted)">Ready</span>
+    </div>
+  </div>
+  <div class="content">
+
+    <!-- ── DASHBOARD ──────────────────────────── -->
+    <div class="page active" id="page-dashboard">
+      <div class="kpi-strip" id="kpi-strip"></div>
+      <div class="card">
+        <div class="card-title">All investments — current snapshot</div>
+        <table class="tbl">
+          <thead><tr>
+            <th style="text-align:left">Investment</th>
+            <th>Deposited</th><th>Latest value</th><th>P&amp;L</th><th>% Return</th><th>Trend</th><th style="width:90px">Last 8 weeks</th>
+          </tr></thead>
+          <tbody id="dash-body"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ── PERFORMANCE ────────────────────────── -->
+    <div class="page" id="page-performance">
+      <div class="alert alert-info">ℹ Rankings based on % return vs total deposited. EUR and GHS shown separately.</div>
+      <div class="card">
+        <div class="card-title">Portfolio goals</div>
+        <div style="display:flex;gap:10px;align-items:end;margin-bottom:1rem;flex-wrap:wrap">
+          <div class="fg"><span class="fl">Target net worth (€ equiv.)</span><input type="number" id="goal-target" placeholder="e.g. 1000" step="10" style="width:160px"></div>
+          <button class="btn btn-teal" onclick="saveGoal()">✓ Set EUR goal</button>
+        </div>
+        <div id="goal-progress" style="margin-bottom:1.2rem"></div>
+        <div style="display:flex;gap:10px;align-items:end;margin-bottom:1rem;flex-wrap:wrap">
+          <div class="fg"><span class="fl">Target net worth (GHS)</span><input type="number" id="goal-target-ghs" placeholder="e.g. 5000" step="50" style="width:160px"></div>
+          <button class="btn btn-amber" onclick="saveGoalGHS()">✓ Set GHS goal</button>
+        </div>
+        <div id="goal-progress-ghs"></div>
+      </div>
+      <div class="card">
+        <div class="card-title">EUR investments — Revolut</div>
+        <div class="perf-grid" id="perf-eur"></div>
+      </div>
+      <div class="card">
+        <div class="card-title">GHS investments — IC &amp; Plus</div>
+        <div class="perf-grid" id="perf-ghs"></div>
+      </div>
+    </div>
+
+    <!-- ── WEEKLY ENTRY ───────────────────────── -->
+    <div class="page" id="page-valuations">
+      <div class="card">
+        <div class="card-title">Sunday valuation entry</div>
+        <div class="form-row">
+          <div class="fg"><span class="fl">Date</span><input type="date" id="val-date"></div>
+          <div class="period-pills">
+            <button class="period-pill active" onclick="setPeriod(0,this)">Nov25–Apr26</button>
+            <button class="period-pill" onclick="setPeriod(1,this)">May–Jun26</button>
+          </div>
+        </div>
+        <div class="fg" style="margin-bottom:1rem"><span class="fl">Notes (optional)</span><input type="text" id="val-notes" placeholder="e.g. market dipped after Fed announcement" style="width:100%"></div>
+        <table class="tbl">
+          <thead><tr>
+            <th style="text-align:left;width:36%">Investment</th>
+            <th>Total deposited</th><th>Last recorded</th><th>New value</th><th>Change</th>
+          </tr></thead>
+          <tbody id="val-body"></tbody>
+        </table>
+        <div style="display:flex;gap:8px;margin-top:1rem;flex-wrap:wrap">
+          <button class="btn btn-teal" onclick="saveValuation()">✓ Save entry</button>
+          <button class="btn" onclick="clearValInputs()">✕ Clear</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── DEPOSIT ────────────────────────────── -->
+    <div class="page" id="page-deposits">
+      <div class="card">
+        <div class="card-title">Record a new deposit</div>
+        <p style="font-size:12px;color:var(--muted);margin-bottom:1rem">Use this whenever you top up one of your investments. The total deposited amount updates automatically and affects all P&amp;L calculations.</p>
+        <div class="form-row">
+          <div class="fg"><span class="fl">Date</span><input type="date" id="dep-date"></div>
+          <div class="fg" style="flex:1;min-width:160px"><span class="fl">Investment</span>
+            <select id="dep-inv" onchange="depPreview()" style="width:100%"><option value="">— choose —</option></select>
+          </div>
+          <div class="fg"><span class="fl">Amount</span><input type="number" id="dep-amt" placeholder="0.00" step="0.01" min="0" oninput="depPreview()" style="width:120px"></div>
+          <button class="btn btn-teal" onclick="saveDeposit()">✓ Save</button>
+        </div>
+        <div class="preview-box" id="dep-preview"></div>
+      </div>
+    </div>
+
+    <!-- ── NEW INVESTMENT ─────────────────── -->
+    <div class="page" id="page-new-investment">
+
+      <div class="card">
+        <div class="card-title">Add a new investment</div>
+        <p style="font-size:12px;color:var(--muted);margin-bottom:1.2rem">
+          Use this when you start investing in something brand new — a stock, ETF, fund or any asset.
+          It immediately appears in Dashboard, Performance, Weekly Entry, Deposits and Total Profits.
+        </p>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
+          <div class="fg">
+            <span class="fl">Investment name</span>
+            <input type="text" id="ni-name" placeholder="e.g. Apple Inc, iShares Gold ETF" style="width:100%">
+          </div>
+          <div class="fg">
+            <span class="fl">Short label (for tables)</span>
+            <input type="text" id="ni-short" placeholder="e.g. Apple, Gold ETF" style="width:100%">
+          </div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:12px">
+          <div class="fg">
+            <span class="fl">Platform</span>
+            <select id="ni-platform" style="width:100%">
+              <option value="REVOLUT">REVOLUT</option>
+              <option value="IC">IC</option>
+              <option value="PLUS">PLUS</option>
+              <option value="OTHER">OTHER</option>
+            </select>
+          </div>
+          <div class="fg">
+            <span class="fl">Currency</span>
+            <select id="ni-cur" style="width:100%">
+              <option value="EUR">EUR (€)</option>
+              <option value="GHS">GHS (₵)</option>
+              <option value="USD">USD ($)</option>
+              <option value="GBP">GBP (£)</option>
+            </select>
+          </div>
+          <div class="fg">
+            <span class="fl">Sector / Type</span>
+            <input type="text" id="ni-sector" placeholder="e.g. Tech, ETF, Fixed Income" style="width:100%">
+          </div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:160px 140px 180px auto;gap:12px;align-items:end;margin-bottom:12px;flex-wrap:wrap">
+          <div class="fg">
+            <span class="fl">Date of first deposit</span>
+            <input type="date" id="ni-date" style="width:100%">
+          </div>
+          <div class="fg">
+            <span class="fl">Amount deposited</span>
+            <input type="number" id="ni-amount" placeholder="0.00" step="0.01" min="0" style="width:100%">
+          </div>
+          <div class="fg">
+            <span class="fl">Current value (if different)</span>
+            <input type="number" id="ni-curval" placeholder="Leave blank if same" step="0.01" style="width:100%">
+          </div>
+          <button class="btn btn-teal" onclick="saveNI()" style="white-space:nowrap">✓ Add to portfolio</button>
+        </div>
+
+        <div id="ni-preview" style="display:none;padding:.75rem 1rem;background:rgba(0,212,170,0.07);border:1px solid rgba(0,212,170,0.2);border-radius:8px;font-family:'DM Mono',monospace;font-size:12px"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Custom investments you have added</div>
+        <div id="ni-list"><p style="color:var(--muted);font-size:13px">No custom investments added yet.</p></div>
+      </div>
+
+    </div>
+
+    <!-- ── WEEK BY WEEK ───────────────────────── -->
+    <div class="page" id="page-weekly-diff">
+      <div class="card">
+        <div class="card-title">Select a week to compare</div>
+        <div class="week-selector" id="week-pills">
+          <span class="week-pill-label">Week ending:</span>
+        </div>
+        <div id="diff-content"></div>
+      </div>
+    </div>
+
+    <!-- ── DEPOSIT LOG ────────────────────────── -->
+    <div class="page" id="page-dep-history">
+      <div class="card">
+        <div class="card-title">All deposits logged</div>
+        <input type="text" id="dep-search" placeholder="Search by investment" style="width:100%;margin-bottom:1rem" oninput="filterDeposits(this.value)">
+        <div class="dep-hdr"><span>Date</span><span>Investment</span><span style="text-align:right">Amount</span><span>Cur</span><span style="text-align:right">Running total</span><span></span></div>
+        <div id="dep-list"></div>
+      </div>
+    </div>
+
+    <!-- ── FULL HISTORY ───────────────────────── -->
+    <div class="page" id="page-history">
+      <div class="card">
+        <div class="card-title">Complete activity log</div>
+        <input type="text" id="hist-search" placeholder="Search by investment or date (YYYY-MM-DD)" style="width:100%;margin-bottom:1rem" oninput="filterHistory(this.value)">
+        <div id="hist-list"></div>
+      </div>
+    </div>
+
+    <!-- ── TOTAL PROFITS ─────────────────────── -->
+    <div class="page" id="page-profits">
+      <div class="card">
+        <div class="card-title">EUR investments (Revolut)</div>
+        <table class="tbl" id="prof-eur-tbl"></table>
+      </div>
+      <div class="card">
+        <div class="card-title">GHS investments (IC &amp; Plus)</div>
+        <table class="tbl" id="prof-ghs-tbl"></table>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+</div><!-- /main -->
+<div id="toast"></div>
+
+<script>
+// ═══════════════════════════════════════════════════════════ DATA
+const BASE = [
+  {id:'alto',    name:'Alto Ingredients Inc',      short:'Alto',         platform:'REVOLUT',cur:'EUR',deposited:86.61, lastVal:112.21,sector:'Chemicals'},
+  {id:'vanguard',name:'Vanguard FTSE All World',   short:'V. FTSE',      platform:'REVOLUT',cur:'EUR',deposited:90.00, lastVal:90.55, sector:'Global ETF'},
+  {id:'netflix', name:'Netflix',                   short:'Netflix',      platform:'REVOLUT',cur:'EUR',deposited:42.33, lastVal:44.08, sector:'Streaming'},
+  {id:'amundi',  name:'Amundi S&P 500 ETF',        short:'Amundi S&P',   platform:'REVOLUT',cur:'EUR',deposited:40.00, lastVal:39.11, sector:'US ETF'},
+  {id:'vsp500',  name:'Vanguard S&P 500 Dist',     short:'V. S&P 500',   platform:'REVOLUT',cur:'EUR',deposited:40.00, lastVal:39.10, sector:'US ETF'},
+  {id:'nvidia',  name:'Nvidia',                    short:'Nvidia',       platform:'REVOLUT',cur:'EUR',deposited:17.60, lastVal:17.03, sector:'Tech'},
+  {id:'nano',    name:'Nano Nuclear Energy',       short:'Nano Nuclear', platform:'REVOLUT',cur:'EUR',deposited:17.29, lastVal:16.76, sector:'Energy'},
+  {id:'ge',      name:'GE Aerospace',              short:'GE Aero',      platform:'REVOLUT',cur:'EUR',deposited:17.06, lastVal:16.50, sector:'Aerospace'},
+  {id:'ic',      name:'IC Liquidity Fund',         short:'IC Fund',      platform:'IC',     cur:'GHS',deposited:2100,  lastVal:2178.71,sector:'Fixed Income'},
+  {id:'plus',    name:'Plus Invest',               short:'Plus Invest',  platform:'PLUS',   cur:'GHS',deposited:1500,  lastVal:1526.70,sector:'Fixed Income'},
+];
+
+let valEntries = JSON.parse(localStorage.getItem('v2_val')||'[]');
+let depEntries = JSON.parse(localStorage.getItem('v2_dep')||'[]');
+let activePeriod = 0;
+let selectedWeek = null;
+
+const PAGE_META = {
+  'dashboard':    {title:'Dashboard',       sub:'Portfolio overview'},
+  'performance':  {title:'Performance',     sub:'Rankings & returns by investment'},
+  'valuations':   {title:'Weekly Entry',    sub:'Log your Sunday valuations'},
+  'deposits':     {title:'Log a Deposit',   sub:'Record a new top-up'},
+  'weekly-diff':  {title:'Week-by-Week',    sub:'Compare changes between entries'},
+  'dep-history':  {title:'Deposit Log',     sub:'All deposits recorded'},
+  'history':      {title:'Full History',    sub:'All activity — valuations & deposits'},
+  'profits':      {title:'Total Profits',   sub:'Cumulative P&L summary'},
+  'new-investment':{title:'New Investment',  sub:'Add a brand-new investment to your portfolio'},
+};
+
+// ═══════════════════════════════════════════════════════════ HELPERS
+function save(){
+  try{localStorage.setItem('v2_val',JSON.stringify(valEntries));localStorage.setItem('v2_dep',JSON.stringify(depEntries));}catch(e){}
+}
+function today(){return new Date().toISOString().split('T')[0];}
+function thisSunday(){const d=new Date();d.setDate(d.getDate()-d.getDay());return d.toISOString().split('T')[0];}
+function fmt2(n){return parseFloat(n).toFixed(2);}
+function fmtPct(n){return (n>=0?'+':'')+parseFloat(n*100).toFixed(1)+'%';}
+function colorClass(n){return n>0?'pos':n<0?'neg':'';}
+
+function getTotalDeposited(id){
+  const base=BASE.find(i=>i.id===id).deposited;
+  return base+depEntries.filter(d=>d.id===id).reduce((s,d)=>s+d.amount,0);
+}
+function getLastVal(id){
+  for(let i=valEntries.length-1;i>=0;i--)if(valEntries[i].values[id]!==undefined)return valEntries[i].values[id];
+  return BASE.find(x=>x.id===id).lastVal;
+}
+// Get value at a specific entry index
+function getValAt(id,entryIdx){
+  // walk backwards from entryIdx to find most recent value for id
+  for(let i=entryIdx;i>=0;i--)if(valEntries[i]&&valEntries[i].values[id]!==undefined)return valEntries[i].values[id];
+  return BASE.find(x=>x.id===id).lastVal;
+}
+
+// ═══════════════════════════════════════════════════════════ NAV
+function nav(el){
+  document.querySelectorAll('.sb-item').forEach(i=>i.classList.remove('active'));
+  el.classList.add('active');
+  const p=el.dataset.page;
+  document.querySelectorAll('.page').forEach(pg=>pg.classList.remove('active'));
+  document.getElementById('page-'+p).classList.add('active');
+  document.getElementById('topbar-title').textContent=PAGE_META[p].title;
+  document.getElementById('topbar-sub').textContent=PAGE_META[p].sub;
+  // lazy build
+  if(p==='dashboard'){buildDash();}
+  if(p==='performance'){buildPerf();}
+  if(p==='weekly-diff'){buildWeeklyDiff();}
+  if(p==='dep-history'){buildDepList();}
+  if(p==='history'){buildHistory();}
+  if(p==='profits'){buildProfits();}
+  if(p==='valuations'){buildValTable();}
+  if(p==='new-investment'){buildNIList();}
+}
+
+// ═══════════════════════════════════════════════════════════ INIT
+window.addEventListener('load',()=>{
+  document.getElementById('val-date').value=thisSunday();
+  document.getElementById('dep-date').value=today();
+  document.getElementById('ni-date').value=today();
+  populateDepSelect();
+  buildKPIs(); buildDash(); buildValTable(); updateBadges();
+  buildNIList();
+  buildGoalProgress();
+  buildGoalProgressGHS();
+  const goalInput=document.getElementById('goal-target');
+  if(goalInput){const g=parseFloat(localStorage.getItem('_goal_target'));if(!isNaN(g))goalInput.value=g;}
+  const goalInputGHS=document.getElementById('goal-target-ghs');
+  if(goalInputGHS){const g2=parseFloat(localStorage.getItem('_goal_target_ghs'));if(!isNaN(g2))goalInputGHS.value=g2;}
+  document.getElementById('file-input').addEventListener('change',e=>{
+    const f=e.target.files[0];if(!f)return;
+    document.getElementById('status-msg').textContent='Loaded: '+f.name;
+    showToast('Excel loaded — will merge on download');
+  });
+  const csvInput=document.getElementById('csv-input');
+  if(csvInput) csvInput.addEventListener('change', handleCSVImport);
+});
+
+// ═══════════════════════════════════════════════════════════ KPI STRIP
+let ghsToEurRate=parseFloat(localStorage.getItem('_fx_ghs_eur'))||0.062;
+function setFxRate(val){
+  const r=parseFloat(val);
+  if(!isNaN(r)&&r>0){ghsToEurRate=r;try{localStorage.setItem('_fx_ghs_eur',r);}catch(e){}buildKPIs();}
+}
+function buildKPIs(){
+  const eurPL=BASE.filter(i=>i.cur==='EUR').reduce((s,i)=>s+(getLastVal(i.id)-getTotalDeposited(i.id)),0);
+  const ghsPL=BASE.filter(i=>i.cur==='GHS').reduce((s,i)=>s+(getLastVal(i.id)-getTotalDeposited(i.id)),0);
+  const bestInv=BASE.slice().sort((a,b)=>{
+    const pa=(getLastVal(a.id)-getTotalDeposited(a.id))/getTotalDeposited(a.id);
+    const pb=(getLastVal(b.id)-getTotalDeposited(b.id))/getTotalDeposited(b.id);
+    return pb-pa;
+  })[0];
+  const bestPct=(getLastVal(bestInv.id)-getTotalDeposited(bestInv.id))/getTotalDeposited(bestInv.id);
+  const totalDep=BASE.filter(i=>i.cur==='EUR').reduce((s,i)=>s+getTotalDeposited(i.id),0);
+  const eurVal=BASE.filter(i=>i.cur==='EUR').reduce((s,i)=>s+getLastVal(i.id),0);
+  const ghsVal=BASE.filter(i=>i.cur==='GHS').reduce((s,i)=>s+getLastVal(i.id),0);
+  const netWorthEUR=eurVal+(ghsVal*ghsToEurRate);
+
+  const kpis=[
+    {label:'Revolut P&L (EUR)',val:eurPL,  fmt:v=>(v>=0?'+':'')+fmt2(v),cls:colorClass(eurPL),  sub:'vs total deposited',k:'k0'},
+    {label:'IC + Plus P&L (GHS)',val:ghsPL,fmt:v=>(v>=0?'+':'')+fmt2(v),cls:colorClass(ghsPL),sub:'vs total deposited',k:'k1'},
+    {label:'Best performer',val:bestPct,fmt:()=>bestInv.short,cls:'neu',sub:fmtPct(bestPct)+' return',k:'k2'},
+    {label:'EUR total invested',val:totalDep,fmt:v=>fmt2(v),cls:'neu',sub:'across '+BASE.filter(i=>i.cur==='EUR').length+' positions',k:'k3'},
+    {label:'Net worth (€ equiv.)',val:netWorthEUR,fmt:v=>'€'+fmt2(v),cls:'neu',sub:'fx',k:'k4',fx:true},
+  ];
+  document.getElementById('kpi-strip').innerHTML=kpis.map(k=>`
+    <div class="kpi ${k.k}">
+      <div class="kpi-label">${k.label}</div>
+      <div class="kpi-val ${k.cls}">${k.fmt(k.val)}</div>
+      ${k.fx?`<div class="fx-input-row">1 GHS = <input type="number" step="0.001" value="${ghsToEurRate}" onchange="setFxRate(this.value)"> EUR</div>`:`<div class="kpi-sub">${k.sub}</div>`}
+    </div>`).join('');
+}
+
+// ═══════════════════════════════════════════════════════════ DASHBOARD TABLE
+function trend(id){
+  const dates=valEntries.filter(e=>e.values[id]!==undefined);
+  if(dates.length<2)return '—';
+  const last=dates[dates.length-1].values[id];
+  const prev=dates[dates.length-2].values[id];
+  return last>prev?'▲':last<prev?'▼':'─';
+}
+function sparklineSVG(id){
+  const series=valEntries.filter(e=>e.values&&e.values[id]!==undefined).map(e=>e.values[id]);
+  if(series.length<2){
+    return `<svg width="80" height="26" viewBox="0 0 80 26"><line x1="0" y1="13" x2="80" y2="13" stroke="var(--border2)" stroke-width="1"/></svg>`;
+  }
+  const last8=series.slice(-8);
+  const min=Math.min(...last8), max=Math.max(...last8);
+  const range=max-min||1;
+  const w=80,h=26,pad=3;
+  const pts=last8.map((v,i)=>{
+    const x=last8.length===1?w/2:(i/(last8.length-1))*(w-pad*2)+pad;
+    const y=h-pad-((v-min)/range)*(h-pad*2);
+    return `${x.toFixed(1)},${y.toFixed(1)}`;
+  }).join(' ');
+  const rising=last8[last8.length-1]>=last8[0];
+  const stroke=rising?'var(--green)':'var(--red)';
+  return `<svg width="80" height="26" viewBox="0 0 ${w} ${h}"><polyline points="${pts}" fill="none" stroke="${stroke}" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+}
+function buildDash(){
+  document.getElementById('dash-body').innerHTML=BASE.map(inv=>{
+    const dep=getTotalDeposited(inv.id);
+    const val=getLastVal(inv.id);
+    const pl=val-dep;
+    const pct=pl/dep;
+    const tr=trend(inv.id);
+    const trCls=tr==='▲'?'pos':tr==='▼'?'neg':'';
+    return `<tr>
+      <td><div class="inv-name">${inv.name}</div><div class="inv-meta"><span class="badge badge-${inv.cur.toLowerCase()}">${inv.cur}</span> ${inv.platform} · ${inv.sector}</div></td>
+      <td class="muted">${fmt2(dep)}</td>
+      <td>${fmt2(val)}</td>
+      <td class="${colorClass(pl)}">${pl>=0?'+':''}${fmt2(pl)}</td>
+      <td class="${colorClass(pct)}">${fmtPct(pct)}</td>
+      <td class="${trCls}" style="font-size:14px;text-align:right">${tr}</td>
+      <td style="text-align:right">${sparklineSVG(inv.id)}</td>
+    </tr>`;
+  }).join('');
+}
+
+// ═══════════════════════════════════════════════════════════ PERFORMANCE
+function buildPerf(){
+  function card(inv){
+    const dep=getTotalDeposited(inv.id);
+    const val=getLastVal(inv.id);
+    const pl=val-dep;
+    const pct=pl/dep;
+    const barW=Math.min(Math.abs(pct)*100*3,100); // scale for visual
+    return `<div class="perf-card">
+      <div class="perf-name">${inv.name}</div>
+      <div class="perf-meta">${inv.platform} · ${inv.sector}</div>
+      <div class="perf-stat"><span class="perf-stat-label">Deposited</span><span class="perf-stat-val muted">${fmt2(dep)} ${inv.cur}</span></div>
+      <div class="perf-stat"><span class="perf-stat-label">Current value</span><span class="perf-stat-val">${fmt2(val)} ${inv.cur}</span></div>
+      <div class="perf-stat"><span class="perf-stat-label">P&L</span><span class="perf-stat-val ${colorClass(pl)}">${pl>=0?'+':''}${fmt2(pl)}</span></div>
+      <div class="perf-stat"><span class="perf-stat-label">% Return</span><span class="perf-stat-val ${colorClass(pct)}">${fmtPct(pct)}</span></div>
+      <div class="pct-bar"><div class="pct-bar-fill" style="width:${barW}%;background:${pct>=0?'var(--green)':'var(--red)'}"></div></div>
+    </div>`;
+  }
+  const eurSorted=[...BASE.filter(i=>i.cur==='EUR')].sort((a,b)=>{
+    const pa=(getLastVal(a.id)-getTotalDeposited(a.id))/getTotalDeposited(a.id);
+    const pb=(getLastVal(b.id)-getTotalDeposited(b.id))/getTotalDeposited(b.id);
+    return pb-pa;
+  });
+  const ghsSorted=[...BASE.filter(i=>i.cur==='GHS')].sort((a,b)=>{
+    const pa=(getLastVal(a.id)-getTotalDeposited(a.id))/getTotalDeposited(a.id);
+    const pb=(getLastVal(b.id)-getTotalDeposited(b.id))/getTotalDeposited(b.id);
+    return pb-pa;
+  });
+  document.getElementById('perf-eur').innerHTML=eurSorted.map(card).join('');
+  document.getElementById('perf-ghs').innerHTML=ghsSorted.map(card).join('');
+}
+
+// ═══════════════════════════════════════════════════════════ VALUATION ENTRY
+function setPeriod(p,el){
+  activePeriod=p;
+  document.querySelectorAll('.period-pill').forEach((b,i)=>b.classList.toggle('active',i===p));
+}
+function buildValTable(){
+  document.getElementById('val-body').innerHTML=BASE.map(inv=>{
+    const last=getLastVal(inv.id);
+    const dep=getTotalDeposited(inv.id);
+    return `<tr>
+      <td><div class="inv-name">${inv.name}</div><div class="inv-meta"><span class="badge badge-${inv.cur.toLowerCase()}">${inv.cur}</span> ${inv.platform}</div></td>
+      <td class="muted">${fmt2(dep)}</td>
+      <td class="muted" id="vl_${inv.id}">${fmt2(last)}</td>
+      <td><input type="number" class="val-input" id="vi_${inv.id}" placeholder="${fmt2(last)}" step="0.01" oninput="calcChg('${inv.id}')" onkeydown="nextRow(event,'${inv.id}')"></td>
+      <td class="chg-cell" id="vc_${inv.id}">—</td>
+    </tr>`;
+  }).join('');
+}
+function calcChg(id){
+  const v=parseFloat(document.getElementById('vi_'+id).value);
+  const el=document.getElementById('vc_'+id);
+  if(isNaN(v)){el.textContent='—';el.className='chg-cell';return;}
+  const diff=v-getLastVal(id);
+  const pct=(diff/getLastVal(id)*100).toFixed(1);
+  el.textContent=(diff>=0?'+':'')+fmt2(diff)+' ('+pct+'%)';
+  el.className='chg-cell '+(diff>=0?'pos':'neg');
+}
+function nextRow(e,id){
+  if(e.key!=='Enter')return;
+  const idx=BASE.findIndex(i=>i.id===id);
+  if(idx<BASE.length-1)document.getElementById('vi_'+BASE[idx+1].id).focus();
+}
+function clearValInputs(){
+  BASE.forEach(inv=>{
+    const vi=document.getElementById('vi_'+inv.id);if(vi)vi.value='';
+    const vc=document.getElementById('vc_'+inv.id);if(vc){vc.textContent='—';vc.className='chg-cell';}
+  });
+}
+function saveValuation(){
+  const date=document.getElementById('val-date').value;
+  if(!date){showToast('Pick a date first',true);return;}
+  const period=activePeriod===0?'NOV25-APR26':'MAY-JUN26';
+  const notesEl=document.getElementById('val-notes');
+  const notes=notesEl?notesEl.value.trim():'';
+  const entry={type:'valuation',date,period,values:{},notes,savedAt:new Date().toISOString()};
+  let cnt=0;
+  BASE.forEach(inv=>{
+    const v=parseFloat(document.getElementById('vi_'+inv.id).value);
+    if(!isNaN(v)){entry.values[inv.id]=v;cnt++;}
+  });
+  if(!cnt){showToast('Enter at least one value',true);return;}
+  valEntries.push(entry);save();
+  buildKPIs();buildDash();buildValTable();clearValInputs();updateBadges();
+  if(notesEl)notesEl.value='';
+  setStatus('Valuation saved: '+date+' ('+cnt+' values)');
+  showToast('✓ Entry saved — '+cnt+' investment'+(cnt>1?'s':'')+' updated');
+}
+
+// ═══════════════════════════════════════════════════════════ DEPOSITS
+function populateDepSelect(){
+  const sel=document.getElementById('dep-inv');
+  BASE.forEach(inv=>{
+    const o=document.createElement('option');
+    o.value=inv.id;o.textContent=inv.name+' ('+inv.cur+')';
+    sel.appendChild(o);
+  });
+}
+function depPreview(){
+  const id=document.getElementById('dep-inv').value;
+  const amt=parseFloat(document.getElementById('dep-amt').value);
+  const box=document.getElementById('dep-preview');
+  if(!id||isNaN(amt)||amt<=0){box.style.display='none';return;}
+  const inv=BASE.find(i=>i.id===id);
+  const cur=getTotalDeposited(id);
+  const nw=cur+amt;
+  box.style.display='block';
+  box.innerHTML=`Current total: <strong>${fmt2(cur)} ${inv.cur}</strong> &nbsp;+&nbsp; <span style="color:var(--green)">+${fmt2(amt)}</span> &nbsp;=&nbsp; <strong style="color:var(--white)">${fmt2(nw)} ${inv.cur}</strong>`;
+}
+function saveDeposit(){
+  const date=document.getElementById('dep-date').value;
+  const id=document.getElementById('dep-inv').value;
+  const amt=parseFloat(document.getElementById('dep-amt').value);
+  if(!date){showToast('Pick a date',true);return;}
+  if(!id){showToast('Choose an investment',true);return;}
+  if(isNaN(amt)||amt<=0){showToast('Enter a valid amount',true);return;}
+  const inv=BASE.find(i=>i.id===id);
+  const prev=getTotalDeposited(id);
+  depEntries.push({type:'deposit',date,id,name:inv.name,amount:amt,currency:inv.cur,platform:inv.platform,prevTotal:prev,newTotal:prev+amt,savedAt:new Date().toISOString()});
+  save();
+  buildKPIs();buildDash();buildValTable();buildDepList();updateBadges();
+  document.getElementById('dep-amt').value='';
+  document.getElementById('dep-preview').style.display='none';
+  setStatus('Deposit saved: +'+fmt2(amt)+' '+inv.cur+' to '+inv.name);
+  showToast('✓ Deposit logged — new total: '+fmt2(prev+amt)+' '+inv.cur);
+}
+
+// ═══════════════════════════════════════════════════════════ WEEK BY WEEK
+function buildWeeklyDiff(){
+  const container=document.getElementById('week-pills');
+  const content=document.getElementById('diff-content');
+  if(!valEntries.length){
+    content.innerHTML='<p style="color:var(--muted);font-size:13px;padding:1rem 0">No valuation entries yet. Add your first Sunday entry to see week-by-week changes.</p>';
+    container.innerHTML='<span class="week-pill-label">Week ending:</span>';
+    return;
+  }
+  // build unique dates list
+  const dates=[...new Set(valEntries.map(e=>e.date))].sort();
+  container.innerHTML='<span class="week-pill-label">Week ending:</span>'+
+    dates.map(d=>`<button class="week-pill${selectedWeek===d?' active':''}" onclick="selectWeek('${d}',this)">${d}</button>`).join('');
+  if(!selectedWeek||!dates.includes(selectedWeek)) selectedWeek=dates[dates.length-1];
+  renderWeekDiff(selectedWeek);
+}
+function selectWeek(date,el){
+  selectedWeek=date;
+  document.querySelectorAll('.week-pill').forEach(p=>p.classList.remove('active'));
+  el.classList.add('active');
+  renderWeekDiff(date);
+}
+function renderWeekDiff(date){
+  const content=document.getElementById('diff-content');
+  // find entry index for this date
+  const eIdx=valEntries.findLastIndex(e=>e.date===date);
+  if(eIdx<0){content.innerHTML='<p style="color:var(--muted)">No data for this date.</p>';return;}
+  const entry=valEntries[eIdx];
+  // find previous entry index (different date, any investment)
+  let prevIdx=-1;
+  for(let i=eIdx-1;i>=0;i--){
+    if(valEntries[i].date!==date){prevIdx=i;break;}
+  }
+  const prevDate=prevIdx>=0?valEntries[prevIdx].date:'(baseline)';
+
+  // build per-investment diff rows
+  const rows=BASE.map(inv=>{
+    const curVal=getValAt(inv.id,eIdx);
+    const prevVal=prevIdx>=0?getValAt(inv.id,prevIdx):inv.lastVal;
+    const diff=curVal-prevVal;
+    const pct=prevVal>0?diff/prevVal:0;
+    const barW=Math.min(Math.abs(pct)*100*5,100);
+    return {inv,curVal,prevVal,diff,pct,barW};
+  });
+
+  const eurRows=rows.filter(r=>r.inv.cur==='EUR');
+  const ghsRows=rows.filter(r=>r.inv.cur==='GHS');
+
+  function tableSection(label,rowSet){
+    return `<div style="margin-bottom:1.4rem">
+      <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:.7rem">${label}</div>
+      <table class="diff-tbl">
+        <thead><tr><th style="text-align:left">Investment</th><th>Previous (${prevDate})</th><th>This week (${date})</th><th>Change</th><th>% Change</th><th style="width:80px"></th></tr></thead>
+        <tbody>${rowSet.map(r=>`<tr>
+          <td>${r.inv.name}</td>
+          <td class="muted">${fmt2(r.prevVal)}</td>
+          <td>${fmt2(r.curVal)}</td>
+          <td class="${colorClass(r.diff)}">${r.diff>=0?'+':''}${fmt2(r.diff)}</td>
+          <td class="${colorClass(r.pct)}">${fmtPct(r.pct)}</td>
+          <td><div class="bar-wrap"><div class="mini-bar ${r.diff>=0?'pos':'neg'}" style="width:${r.barW}px"></div></div></td>
+        </tr>`).join('')}</tbody>
+      </table>
+    </div>`;
+  }
+
+  // summary
+  const eurDiff=eurRows.reduce((s,r)=>s+r.diff,0);
+  const ghsDiff=ghsRows.reduce((s,r)=>s+r.diff,0);
+  content.innerHTML=`
+    <div style="display:flex;gap:10px;margin-bottom:1.2rem">
+      <div class="kpi k0" style="flex:1"><div class="kpi-label">EUR week change</div><div class="kpi-val ${colorClass(eurDiff)}">${eurDiff>=0?'+':''}${fmt2(eurDiff)}</div><div class="kpi-sub">All Revolut positions</div></div>
+      <div class="kpi k1" style="flex:1"><div class="kpi-label">GHS week change</div><div class="kpi-val ${colorClass(ghsDiff)}">${ghsDiff>=0?'+':''}${fmt2(ghsDiff)}</div><div class="kpi-sub">IC + Plus</div></div>
+    </div>
+    ${tableSection('EUR — Revolut',eurRows)}
+    ${tableSection('GHS — IC & Plus',ghsRows)}
+  `;
+}
+
+// ═══════════════════════════════════════════════════════════ DEPOSIT LIST
+let depositFilter='';
+function filterDeposits(val){ depositFilter=val; buildDepList(); }
+function buildDepList(){
+  const el=document.getElementById('dep-list');
+  if(!depEntries.length){el.innerHTML='<p style="color:var(--muted);font-size:13px;padding:1rem 0">No deposits logged yet.</p>';return;}
+  const q=depositFilter.trim().toLowerCase();
+  const indexed=depEntries.map((d,i)=>({d,i}));
+  const filtered=!q?indexed:indexed.filter(({d})=>d.name.toLowerCase().includes(q)||d.date.includes(q));
+  if(!filtered.length){el.innerHTML='<p style="color:var(--muted);font-size:13px;padding:1rem 0">No matching deposits.</p>';return;}
+  el.innerHTML=[...filtered].reverse().map(({d,i})=>{
+    return `<div class="dep-row">
+      <span style="font-family:'DM Mono',monospace;font-size:11px;color:var(--teal)">${d.date}</span>
+      <span style="font-size:12px;font-weight:600">${d.name}</span>
+      <span style="font-family:'DM Mono',monospace;font-size:12px;color:var(--green);text-align:right">+${fmt2(d.amount)}</span>
+      <span class="badge badge-${d.currency.toLowerCase()}">${d.currency}</span>
+      <span style="font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);text-align:right">${fmt2(d.newTotal)} total</span>
+      <div style="display:flex;gap:4px"><button class="btn btn-ghost" style="padding:3px 6px" onclick="editDeposit(${i})" title="Edit">✎</button><button class="btn btn-ghost" style="padding:3px 6px" onclick="delDeposit(${i})" title="Delete">✕</button></div>
+    </div>`;
+  }).join('');
+}
+function delDeposit(i){depEntries.splice(i,1);save();buildKPIs();buildDash();buildDepList();buildHistory();updateBadges();showToast('Deposit removed');}
+
+// ═══════════════════════════════════════════════════════════ HISTORY
+let historyFilter='';
+function filterHistory(val){ historyFilter=val; buildHistory(); }
+function buildHistory(){
+  const all=[
+    ...valEntries.map((e,i)=>({...e,_i:i,_t:'val'})),
+    ...depEntries.map((e,i)=>({...e,_i:i,_t:'dep'})),
+  ].sort((a,b)=>b.date.localeCompare(a.date)||b.savedAt.localeCompare(a.savedAt));
+  const el=document.getElementById('hist-list');
+  const nm={};BASE.forEach(i=>nm[i.id]=i.short);
+  const q=historyFilter.trim().toLowerCase();
+  const filtered=!q?all:all.filter(e=>{
+    if(e._t==='val'){
+      const names=Object.keys(e.values).map(id=>(nm[id]||id).toLowerCase()).join(' ');
+      return e.date.includes(q)||names.includes(q)||(e.period||'').toLowerCase().includes(q);
+    }else{
+      return e.date.includes(q)||(e.name||'').toLowerCase().includes(q);
+    }
+  });
+  if(!filtered.length){el.innerHTML='<p style="color:var(--muted);font-size:13px">'+(q?'No matching activity.':'No activity yet.')+'</p>';return;}
+  el.innerHTML=filtered.map(e=>{
+    if(e._t==='val'){
+      const cnt=Object.keys(e.values).length;
+      const chips=Object.entries(e.values).map(([id,v])=>`<span class="h-chip">${nm[id]||id}: ${fmt2(v)}</span>`).join('');
+      return `<div class="hist-item">
+        <div class="h-date">${e.date}</div>
+        <div><span class="h-badge val">Valuation</span><div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);margin-top:3px">${e.period}</div></div>
+        <div class="h-info"><strong>${cnt} investment${cnt>1?'s':''} updated</strong>${e.notes?`<div style="font-style:italic;color:var(--muted);margin-top:2px">"${e.notes}"</div>`:''}<div class="h-chips">${chips}</div></div>
+        <div style="display:flex;gap:4px"><button class="btn btn-ghost" onclick="editVal(${e._i})" title="Edit">✎</button><button class="btn btn-ghost" onclick="delVal(${e._i})" title="Delete">✕</button></div>
+      </div>`;
+    } else {
+      return `<div class="hist-item">
+        <div class="h-date">${e.date}</div>
+        <div><span class="h-badge dep">Deposit</span></div>
+        <div class="h-info"><strong>${e.name}</strong><div class="h-chips"><span class="h-chip d">+${fmt2(e.amount)} ${e.currency}</span><span class="h-chip">Total: ${fmt2(e.newTotal)}</span></div></div>
+        <div style="display:flex;gap:4px"><button class="btn btn-ghost" onclick="editDeposit(${e._i})" title="Edit">✎</button><button class="btn btn-ghost" onclick="delDeposit(${e._i})" title="Delete">✕</button></div>
+      </div>`;
+    }
+  }).join('');
+}
+function editVal(i){
+  const e=valEntries[i];
+  if(!e)return;
+  const nm={};BASE.forEach(b=>nm[b.id]=b.name);
+  const lines=Object.entries(e.values).map(([id,v])=>`${nm[id]||id}=${v}`).join('\n');
+  const result=prompt('Edit values for '+e.date+' (one per line, format Name=Value).', lines);
+  if(result===null)return;
+  const newValues={};
+  result.split('\n').forEach(line=>{
+    const eq=line.lastIndexOf('=');
+    if(eq<0)return;
+    const label=line.slice(0,eq).trim();
+    const num=parseFloat(line.slice(eq+1).trim());
+    if(isNaN(num))return;
+    const inv=BASE.find(b=>b.name===label||b.short===label||b.id===label);
+    if(inv)newValues[inv.id]=num;
+  });
+  e.values=newValues;
+  save();buildKPIs();buildDash();buildValTable();buildHistory();buildWeeklyDiff();updateBadges();
+  showToast('Entry updated');
+}
+function editDeposit(i){
+  const d=depEntries[i];
+  if(!d)return;
+  const result=prompt('Edit deposit amount for '+d.name+' on '+d.date+' ('+d.currency+'):', d.amount);
+  if(result===null)return;
+  const num=parseFloat(result);
+  if(isNaN(num)||num<=0){showToast('Invalid amount',true);return;}
+  d.amount=num;
+  d.newTotal=d.prevTotal+num;
+  save();buildKPIs();buildDash();buildDepList();buildHistory();updateBadges();
+  showToast('Deposit updated');
+}
+function delVal(i){valEntries.splice(i,1);save();buildKPIs();buildDash();buildValTable();buildHistory();buildWeeklyDiff();updateBadges();showToast('Entry removed');}
+
+// ═══════════════════════════════════════════════════════════ TOTAL PROFITS
+function buildProfits(){
+  function profTable(el,invs){
+    const dep=invs.reduce((s,i)=>s+getTotalDeposited(i.id),0);
+    const val=invs.reduce((s,i)=>s+getLastVal(i.id),0);
+    const pl=val-dep;
+    el.innerHTML=`<thead><tr>
+      <th style="text-align:left">Investment</th><th>Sector</th><th>Deposited</th><th>Latest value</th><th>P&L</th><th>% Return</th>
+    </tr></thead><tbody>`+
+    invs.map(inv=>{
+      const d=getTotalDeposited(inv.id),v=getLastVal(inv.id),p=v-d,pct=p/d;
+      return `<tr><td><div class="inv-name">${inv.name}</div></td><td class="muted">${inv.sector}</td><td class="muted">${fmt2(d)}</td><td>${fmt2(v)}</td><td class="${colorClass(p)}">${p>=0?'+':''}${fmt2(p)}</td><td class="${colorClass(pct)}">${fmtPct(pct)}</td></tr>`;
+    }).join('')+
+    `<tr style="border-top:1px solid var(--border2)">
+      <td colspan="2" style="font-weight:700;color:var(--white)">TOTAL</td>
+      <td style="font-family:'DM Mono',monospace;font-weight:700">${fmt2(dep)}</td>
+      <td style="font-family:'DM Mono',monospace;font-weight:700">${fmt2(val)}</td>
+      <td class="${colorClass(pl)}" style="font-weight:700">${pl>=0?'+':''}${fmt2(pl)}</td>
+      <td class="${colorClass(pl/dep)}" style="font-weight:700">${fmtPct(pl/dep)}</td>
+    </tr></tbody>`;
+  }
+  profTable(document.getElementById('prof-eur-tbl'),BASE.filter(i=>i.cur==='EUR'));
+  profTable(document.getElementById('prof-ghs-tbl'),BASE.filter(i=>i.cur==='GHS'));
+}
+
+// ═══════════════════════════════════════════════════════════ BADGES
+function updateBadges(){
+  // add count badges to sidebar items
+  const vBadge=document.querySelector('[data-page="valuations"] .sb-badge');
+  const dBadge=document.querySelector('[data-page="dep-history"] .sb-badge');
+  const hBadge=document.querySelector('[data-page="history"] .sb-badge');
+  if(vBadge)vBadge.textContent=valEntries.length;
+  if(dBadge)dBadge.textContent=depEntries.length;
+  if(hBadge)hBadge.textContent=valEntries.length+depEntries.length;
+}
+// inject badges into sidebar items after load
+document.querySelector('[data-page="valuations"]').insertAdjacentHTML('beforeend','<span class="sb-badge">0</span>');
+document.querySelector('[data-page="dep-history"]').insertAdjacentHTML('beforeend','<span class="sb-badge amber">0</span>');
+document.querySelector('[data-page="history"]').insertAdjacentHTML('beforeend','<span class="sb-badge">0</span>');
+
+// ═══════════════════════════════════════════════════════════ EXCEL EXPORT
+function exportExcel(){
+  const wb=XLSX.utils.book_new();
+  const nm={},cu={},pl={};
+  BASE.forEach(i=>{nm[i.id]=i.name;cu[i.id]=i.cur;pl[i.id]=i.platform;});
+
+  // DASHBOARD
+  const dR=[['INVESTMENT PORTFOLIO TRACKER'],['Updated: '+new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'})],[],
+    ['INVESTMENT','SECTOR','PLATFORM','CURRENCY','TOTAL DEPOSITED','LATEST VALUE','P&L','% RETURN']];
+  BASE.forEach(inv=>{const d=getTotalDeposited(inv.id),v=getLastVal(inv.id),p=v-d;dR.push([inv.name,inv.sector,inv.platform,inv.cur,d,v,p,d>0?p/d:'']);});
+  const dS=XLSX.utils.aoa_to_sheet(dR);dS['!cols']=[{wch:28},{wch:18},{wch:10},{wch:8},{wch:16},{wch:14},{wch:12},{wch:12}];
+  XLSX.utils.book_append_sheet(wb,dS,'DASHBOARD');
+
+  // WEEKLY LOG
+  const wR=[['Date','Period','Investment','Platform','Currency','Total Deposited','Value','P&L','% Return']];
+  valEntries.forEach(e=>Object.entries(e.values).forEach(([id,val])=>{const d=getTotalDeposited(id),p=val-d;wR.push([e.date,e.period,nm[id],pl[id],cu[id],d,val,p,d>0?p/d:'']);}));
+  const wS=XLSX.utils.aoa_to_sheet(wR);wS['!cols']=[{wch:12},{wch:14},{wch:28},{wch:10},{wch:8},{wch:16},{wch:12},{wch:12},{wch:12}];
+  XLSX.utils.book_append_sheet(wb,wS,'WEEKLY LOG');
+
+  // VALUATION HISTORY PIVOT
+  const vR=[['DATE','PERIOD',...BASE.map(i=>i.name+' ('+i.cur+')')]];
+  valEntries.forEach(e=>vR.push([e.date,e.period,...BASE.map(i=>e.values[i.id]!==undefined?e.values[i.id]:'')]));
+  const vS=XLSX.utils.aoa_to_sheet(vR);vS['!cols']=[{wch:12},{wch:14},...BASE.map(()=>({wch:22}))];
+  XLSX.utils.book_append_sheet(wb,vS,'VALUATION HISTORY');
+
+  // WEEK BY WEEK DIFF
+  const dates=[...new Set(valEntries.map(e=>e.date))].sort();
+  const wdR=[['Date','Investment','Previous value','This week value','Change','% Change']];
+  dates.forEach(date=>{
+    const eIdx=valEntries.findLastIndex(e=>e.date===date);
+    let prevIdx=-1;for(let i=eIdx-1;i>=0;i--){if(valEntries[i].date!==date){prevIdx=i;break;}}
+    BASE.forEach(inv=>{
+      const cur=getValAt(inv.id,eIdx);
+      const prev=prevIdx>=0?getValAt(inv.id,prevIdx):inv.lastVal;
+      const diff=cur-prev;
+      wdR.push([date,inv.name,prev,cur,diff,prev>0?diff/prev:'']);
+    });
+  });
+  const wdS=XLSX.utils.aoa_to_sheet(wdR);wdS['!cols']=[{wch:12},{wch:28},{wch:14},{wch:14},{wch:12},{wch:12}];
+  XLSX.utils.book_append_sheet(wb,wdS,'WEEK BY WEEK');
+
+  // DEPOSIT LOG
+  const dpR=[['Date','Investment','Platform','Currency','Amount','Running Total']];
+  depEntries.forEach(d=>dpR.push([d.date,d.name,d.platform,d.currency,d.amount,d.newTotal]));
+  dpR.push([],[' — Original base deposits —']);
+  BASE.forEach(inv=>dpR.push(['(original)',inv.name,inv.platform,inv.cur,inv.deposited,inv.deposited]));
+  const dpS=XLSX.utils.aoa_to_sheet(dpR);dpS['!cols']=[{wch:12},{wch:28},{wch:10},{wch:8},{wch:14},{wch:18}];
+  XLSX.utils.book_append_sheet(wb,dpS,'DEPOSIT LOG');
+
+  // TOTAL PROFITS
+  const pR=[['INVESTMENT','SECTOR','CURRENCY','TOTAL DEPOSITED','LATEST VALUE','TOTAL P&L','% RETURN']];
+  BASE.forEach(inv=>{const d=getTotalDeposited(inv.id),v=getLastVal(inv.id),p=v-d;pR.push([inv.name,inv.sector,inv.cur,d,v,p,d>0?p/d:'']);});
+  pR.push([]);
+  ['EUR','GHS'].forEach(cur=>{
+    const invs=BASE.filter(i=>i.cur===cur);
+    const td=invs.reduce((s,i)=>s+getTotalDeposited(i.id),0);
+    const tv=invs.reduce((s,i)=>s+getLastVal(i.id),0);
+    pR.push(['TOTAL '+cur,,,td,tv,tv-td,td>0?(tv-td)/td:'']);
+  });
+  const pS=XLSX.utils.aoa_to_sheet(pR);pS['!cols']=[{wch:28},{wch:18},{wch:8},{wch:16},{wch:14},{wch:12},{wch:12}];
+  XLSX.utils.book_append_sheet(wb,pS,'TOTAL PROFITS');
+
+  XLSX.writeFile(wb,'Portfolio_'+today()+'.xlsx');
+  showToast('✓ Excel downloaded — 6 sheets included');
+}
+
+// ═══════════════════════════════════════════════════════════ UTILS
+function setStatus(msg){
+  document.getElementById('status-msg').textContent=msg;
+}
+function showToast(msg,err=false){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.className='show'+(err?' err':'');
+  setTimeout(()=>t.className='',2800);
+}
+
+// ══════════════════════════════ NEW INVESTMENT MANAGER
+let customInvs = JSON.parse(localStorage.getItem('_custom_invs') || '[]');
+
+// Restore custom investments into BASE array on every page load
+(function restoreCustom(){
+  customInvs.forEach(function(inv){
+    if(!BASE.find(function(b){return b.id===inv.id;})){
+      BASE.push(inv);
+    }
+  });
+}());
+
+function saveCustomInvs(){
+  try{ localStorage.setItem('_custom_invs', JSON.stringify(customInvs)); }catch(e){}
+}
+
+function saveNI(){
+  var name   = (document.getElementById('ni-name').value||'').trim();
+  var shortN = (document.getElementById('ni-short').value||'').trim();
+  var plat   = document.getElementById('ni-platform').value;
+  var cur    = document.getElementById('ni-cur').value;
+  var sector = (document.getElementById('ni-sector').value||'').trim() || 'Other';
+  var date   = document.getElementById('ni-date').value;
+  var amt    = parseFloat(document.getElementById('ni-amount').value);
+  var curval = parseFloat(document.getElementById('ni-curval').value);
+
+  if(!name)            { showToast('Enter an investment name', true); return; }
+  if(!date)            { showToast('Pick a deposit date', true); return; }
+  if(isNaN(amt)||amt<=0){ showToast('Enter a deposit amount', true); return; }
+
+  if(!shortN) shortN = name.split(' ')[0];
+  var lastV = (!isNaN(curval) && curval > 0) ? curval : amt;
+
+  // Build a safe unique id
+  var slug = name.toLowerCase().replace(/[^a-z0-9]+/g,'_').slice(0,18);
+  var id   = 'ci_' + slug + '_' + Date.now().toString(36);
+
+  var inv = {id:id, name:name, short:shortN, platform:plat, cur:cur,
+             deposited:amt, lastVal:lastV, sector:sector, isCustom:true};
+
+  BASE.push(inv);
+  customInvs.push(inv);
+
+  // Log the initial deposit
+  depEntries.push({
+    type:'deposit', date:date, id:id, name:name,
+    amount:amt, currency:cur, platform:plat,
+    prevTotal:0, newTotal:amt,
+    savedAt:new Date().toISOString()
+  });
+
+  // Log initial valuation if current value was supplied and differs
+  if(!isNaN(curval) && curval > 0 && curval !== amt){
+    var ve = {type:'valuation', date:date, period:'CUSTOM', values:{}, savedAt:new Date().toISOString()};
+    ve.values[id] = curval;
+    valEntries.push(ve);
+  }
+
+  saveCustomInvs(); save();
+  buildKPIs(); buildDash(); buildValTable(); buildNIList(); updateBadges();
+  populateDepSelect();
+  clearNI();
+
+  // Show confirmation in preview box
+  var box = document.getElementById('ni-preview');
+  box.style.display='block';
+  box.style.background='rgba(46,204,143,0.1)';
+  box.style.borderColor='rgba(46,204,143,0.3)';
+  box.innerHTML = '&#10003; <strong>' + name + '</strong> added — '
+    + amt.toFixed(2) + ' ' + cur + ' deposited on ' + date
+    + '. Now visible in all pages.';
+
+  showToast('&#10003; ' + name + ' added to your portfolio');
+}
+
+function clearNI(){
+  ['ni-name','ni-short','ni-sector','ni-amount','ni-curval'].forEach(function(x){
+    var e = document.getElementById(x); if(e) e.value = '';
+  });
+  var d = document.getElementById('ni-date'); if(d) d.value = today();
+}
+
+function buildNIList(){
+  var el = document.getElementById('ni-list');
+  if(!el) return;
+  if(!customInvs.length){
+    el.innerHTML = '<p style="color:var(--muted);font-size:13px">No custom investments added yet.</p>';
+    return;
+  }
+  var hdr = '<div style="display:grid;grid-template-columns:1fr 100px 50px 100px 28px;gap:8px;'
+    + 'padding:0 0 6px;border-bottom:1px solid var(--border);margin-bottom:4px;'
+    + 'font-family:\'DM Mono\',monospace;font-size:9px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)">'
+    + '<span>Investment</span><span style="text-align:right">Deposited</span>'
+    + '<span style="text-align:center">Cur</span><span style="text-align:right">P&amp;L</span><span></span></div>';
+
+  var rows = customInvs.map(function(inv, i){
+    var dep = depEntries.filter(function(d){return d.id===inv.id;})
+                        .reduce(function(s,d){return s+d.amount;}, 0);
+    var val = getLastVal(inv.id);
+    var pl  = val - dep;
+    var clr = pl >= 0 ? 'var(--green)' : 'var(--red)';
+    return '<div style="display:grid;grid-template-columns:1fr 100px 50px 100px 28px;gap:8px;'
+      + 'align-items:center;padding:9px 0;border-bottom:1px solid var(--border);font-size:12px">'
+      + '<div><strong style="font-size:13px">' + inv.name + '</strong>'
+      + '<div style="font-family:\'DM Mono\',monospace;font-size:10px;color:var(--muted)">'
+      + inv.sector + ' &middot; ' + inv.platform + '</div></div>'
+      + '<span style="font-family:\'DM Mono\',monospace;text-align:right">' + dep.toFixed(2) + '</span>'
+      + '<span style="text-align:center"><span class="badge badge-' + inv.cur.toLowerCase() + '">'
+      + inv.cur + '</span></span>'
+      + '<span style="font-family:\'DM Mono\',monospace;font-weight:600;text-align:right;color:' + clr + '">'
+      + (pl>=0?'+':'') + pl.toFixed(2) + '</span>'
+      + '<button class="btn btn-ghost" title="Remove" onclick="removeNI(' + i + ')">&#10005;</button>'
+      + '</div>';
+  }).join('');
+
+  el.innerHTML = hdr + rows;
+}
+
+function removeNI(i){
+  var inv = customInvs[i];
+  // Remove from BASE
+  var bi = BASE.findIndex(function(b){return b.id===inv.id;});
+  if(bi > -1) BASE.splice(bi, 1);
+  // Remove related entries
+  depEntries = depEntries.filter(function(d){return d.id !== inv.id;});
+  valEntries = valEntries.filter(function(v){
+    if(!v.values) return true;
+    delete v.values[inv.id];
+    return true;
+  });
+  customInvs.splice(i, 1);
+  saveCustomInvs(); save();
+  buildKPIs(); buildDash(); buildValTable(); buildNIList(); updateBadges(); populateDepSelect();
+  showToast('Investment removed');
+}
+
+
+
+// ══════════════════════════════ GOAL TRACKING
+function saveGoal(){
+  const v=parseFloat(document.getElementById('goal-target').value);
+  if(isNaN(v)||v<=0){showToast('Enter a valid target amount',true);return;}
+  try{localStorage.setItem('_goal_target',v);}catch(e){}
+  buildGoalProgress();
+  showToast('✓ Goal set: €'+fmt2(v));
+}
+function buildGoalProgress(){
+  const el=document.getElementById('goal-progress');
+  if(!el)return;
+  const target=parseFloat(localStorage.getItem('_goal_target'));
+  if(isNaN(target)||target<=0){
+    el.innerHTML='<p style="color:var(--muted);font-size:13px">Set a target above to track progress toward your EUR net worth goal.</p>';
+    return;
+  }
+  const eurVal=BASE.filter(i=>i.cur==='EUR').reduce((s,i)=>s+getLastVal(i.id),0);
+  const ghsVal=BASE.filter(i=>i.cur==='GHS').reduce((s,i)=>s+getLastVal(i.id),0);
+  const rate=(typeof ghsToEurRate!=='undefined'&&ghsToEurRate)?ghsToEurRate:0.062;
+  const current=eurVal+(ghsVal*rate);
+  const pct=Math.min((current/target)*100,100);
+  const remaining=Math.max(target-current,0);
+  el.innerHTML=`
+    <div style="display:flex;justify-content:space-between;margin-bottom:6px;font-family:'DM Mono',monospace;font-size:12px">
+      <span>€${fmt2(current)} of €${fmt2(target)}</span>
+      <span style="color:var(--teal);font-weight:600">${pct.toFixed(1)}%</span>
+    </div>
+    <div style="height:8px;background:var(--navy3);border-radius:4px;overflow:hidden">
+      <div style="height:100%;width:${pct}%;background:var(--teal);border-radius:4px;transition:width .4s"></div>
+    </div>
+    <div style="margin-top:6px;font-family:'DM Mono',monospace;font-size:11px;color:var(--muted)">${remaining>0?'€'+fmt2(remaining)+' remaining to reach your goal':'Goal reached! 🎉'}</div>
+  `;
+}
+
+function saveGoalGHS(){
+  const v=parseFloat(document.getElementById('goal-target-ghs').value);
+  if(isNaN(v)||v<=0){showToast('Enter a valid target amount',true);return;}
+  try{localStorage.setItem('_goal_target_ghs',v);}catch(e){}
+  buildGoalProgressGHS();
+  showToast('✓ GHS goal set: GHS'+fmt2(v));
+}
+function buildGoalProgressGHS(){
+  const el=document.getElementById('goal-progress-ghs');
+  if(!el)return;
+  const target=parseFloat(localStorage.getItem('_goal_target_ghs'));
+  if(isNaN(target)||target<=0){
+    el.innerHTML='<p style="color:var(--muted);font-size:13px">Set a target above to track progress toward your GHS net worth goal.</p>';
+    return;
+  }
+  const current=BASE.filter(i=>i.cur==='GHS').reduce((s,i)=>s+getLastVal(i.id),0);
+  const pct=Math.min((current/target)*100,100);
+  const remaining=Math.max(target-current,0);
+  el.innerHTML=`
+    <div style="display:flex;justify-content:space-between;margin-bottom:6px;font-family:'DM Mono',monospace;font-size:12px">
+      <span>GHS${fmt2(current)} of GHS${fmt2(target)}</span>
+      <span style="color:var(--amber);font-weight:600">${pct.toFixed(1)}%</span>
+    </div>
+    <div style="height:8px;background:var(--navy3);border-radius:4px;overflow:hidden">
+      <div style="height:100%;width:${pct}%;background:var(--amber);border-radius:4px;transition:width .4s"></div>
+    </div>
+    <div style="margin-top:6px;font-family:'DM Mono',monospace;font-size:11px;color:var(--muted)">${remaining>0?'GHS'+fmt2(remaining)+' remaining to reach your goal':'Goal reached! 🎉'}</div>
+  `;
+}
+
+// ══════════════════════════════ PDF EXPORT (print-friendly summary)
+function exportPDF(){
+  const eurInvs=BASE.filter(i=>i.cur==='EUR');
+  const ghsInvs=BASE.filter(i=>i.cur==='GHS');
+  const rows=(invs)=>invs.map(inv=>{
+    const dep=getTotalDeposited(inv.id),val=getLastVal(inv.id),pl=val-dep,pct=pl/dep;
+    return `<tr><td>${inv.name}</td><td style="text-align:right">${fmt2(dep)}</td><td style="text-align:right">${fmt2(val)}</td><td style="text-align:right;color:${pl>=0?'#1ea872':'#d6433f'}">${pl>=0?'+':''}${fmt2(pl)}</td><td style="text-align:right;color:${pct>=0?'#1ea872':'#d6433f'}">${fmtPct(pct)}</td></tr>`;
+  }).join('');
+  const w=window.open('','_blank');
+  w.document.write(`
+    <html><head><title>Portfolio Summary - ${today()}</title>
+    <style>
+      body{font-family:Arial,sans-serif;padding:40px;color:#1a2433}
+      h1{font-size:22px;margin-bottom:4px}
+      .sub{color:#64748a;font-size:12px;margin-bottom:24px}
+      h2{font-size:15px;margin-top:28px;margin-bottom:10px;border-bottom:2px solid #1a2433;padding-bottom:4px}
+      table{width:100%;border-collapse:collapse;font-size:13px}
+      th{text-align:left;padding:6px 8px;border-bottom:1px solid #ccc;color:#64748a;font-size:11px;text-transform:uppercase}
+      th:not(:first-child){text-align:right}
+      td{padding:6px 8px;border-bottom:1px solid #eee}
+    </style></head><body>
+    <h1>Investment Portfolio Summary</h1>
+    <div class="sub">Generated ${new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'long',year:'numeric'})}</div>
+    <h2>EUR Investments — Revolut</h2>
+    <table><thead><tr><th>Investment</th><th>Deposited</th><th>Latest value</th><th>P&amp;L</th><th>% Return</th></tr></thead>
+    <tbody>${rows(eurInvs)}</tbody></table>
+    <h2>GHS Investments — IC &amp; Plus Invest</h2>
+    <table><thead><tr><th>Investment</th><th>Deposited</th><th>Latest value</th><th>P&amp;L</th><th>% Return</th></tr></thead>
+    <tbody>${rows(ghsInvs)}</tbody></table>
+    </body></html>
+  `);
+  w.document.close();
+  setTimeout(()=>{ w.focus(); w.print(); }, 400);
+  showToast('Opening print dialog — choose "Save as PDF"');
+}
+
+// ══════════════════════════════ CSV BULK IMPORT
+function handleCSVImport(e){
+  const file=e.target.files[0];
+  if(!file)return;
+  const reader=new FileReader();
+  reader.onload=function(evt){
+    const text=evt.target.result;
+    const lines=text.split(/\r?\n/).filter(l=>l.trim());
+    if(lines.length<2){showToast('CSV appears empty',true);return;}
+    const header=lines[0].split(',').map(h=>h.trim().toLowerCase());
+    const dateIdx=header.indexOf('date');
+    const nameIdx=header.findIndex(h=>h.includes('investment')||h.includes('name'));
+    const valIdx=header.findIndex(h=>h.includes('value')||h.includes('valuation'));
+    if(dateIdx<0||nameIdx<0||valIdx<0){
+      showToast('CSV needs columns: date, investment, value',true);
+      return;
+    }
+    const nm={};BASE.forEach(b=>{nm[b.name.toLowerCase()]=b.id;nm[b.short.toLowerCase()]=b.id;nm[b.id]=b.id;});
+    const byDate={};
+    let matched=0,skipped=0;
+    for(let i=1;i<lines.length;i++){
+      const cols=lines[i].split(',').map(c=>c.trim());
+      const date=cols[dateIdx];
+      const name=(cols[nameIdx]||'').toLowerCase();
+      const val=parseFloat(cols[valIdx]);
+      if(!date||isNaN(val)){skipped++;continue;}
+      const id=nm[name];
+      if(!id){skipped++;continue;}
+      if(!byDate[date])byDate[date]={};
+      byDate[date][id]=val;
+      matched++;
+    }
+    Object.entries(byDate).forEach(([date,values])=>{
+      valEntries.push({type:'valuation',date,period:(typeof activePeriod!=='undefined'&&activePeriod===0)?'NOV25-APR26':'MAY-JUN26',values,savedAt:new Date().toISOString(),notes:'Imported from CSV'});
+    });
+    save();
+    buildKPIs();buildDash();buildValTable();buildHistory();buildWeeklyDiff();updateBadges();
+    showToast('✓ Imported '+matched+' values'+(skipped?' ('+skipped+' rows skipped)':''));
+    e.target.value='';
+  };
+  reader.readAsText(file);
+}
+
+// Make Array.findLastIndex work in older browsers
+if(!Array.prototype.findLastIndex){
+  Array.prototype.findLastIndex=function(fn){for(let i=this.length-1;i>=0;i--)if(fn(this[i],i,this))return i;return -1;};
+}
+</script>
+</body>
+</html>
