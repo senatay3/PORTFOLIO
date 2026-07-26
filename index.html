@@ -6,6 +6,7 @@
 <title>Portfolio Tracker</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Syne:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://accounts.google.com/gsi/client" async defer></script>
 <style>
 :root{
   --navy:#0b1623;--navy2:#11202f;--navy3:#182d42;--navy4:#1e3855;
@@ -239,6 +240,23 @@ input::placeholder{color:var(--muted2)}
 ::-webkit-scrollbar-track{background:transparent}
 ::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
 
+  /* ── DRIVE SYNC */
+  .sync-pill{display:inline-flex;align-items:center;gap:5px;font-family:'DM Mono',monospace;font-size:10px;padding:3px 9px;border-radius:20px;cursor:pointer;transition:all .2s}
+  .sync-pill.local{background:var(--amber2);color:var(--amber);border:1px solid rgba(245,166,35,0.25)}
+  .sync-pill.syncing{background:var(--purple2);color:var(--purple);border:1px solid rgba(139,127,255,0.25)}
+  .sync-pill.synced{background:var(--green2);color:var(--green);border:1px solid rgba(46,204,143,0.25)}
+  .sync-pill.error{background:var(--red2);color:var(--red);border:1px solid rgba(255,92,92,0.25)}
+  .spin{display:inline-block;animation:spin 1s linear infinite}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.65);z-index:200;display:none;align-items:center;justify-content:center;backdrop-filter:blur(4px)}
+  .modal-overlay.open{display:flex}
+  .modal-box{background:var(--navy2);border:1px solid var(--border2);border-radius:16px;padding:2rem;max-width:500px;width:92%}
+  .modal-box h2{font-size:1.1rem;font-weight:800;margin-bottom:.4rem}
+  .modal-box p{font-size:12px;color:var(--muted);line-height:1.7;margin-bottom:.8rem}
+  .modal-step{display:flex;gap:10px;align-items:flex-start;margin-bottom:.75rem;font-size:12px;line-height:1.6}
+  .modal-step-n{width:20px;height:20px;border-radius:50%;background:var(--teal);color:var(--navy);font-weight:800;font-size:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
+  .modal-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:1.2rem}
+  code{background:var(--navy3);padding:1px 6px;border-radius:4px;font-family:'DM Mono',monospace;font-size:11px}
 @media(max-width:700px){
   .sidebar{display:none}
   .kpi-strip{grid-template-columns:repeat(2,1fr)}
@@ -291,6 +309,8 @@ input::placeholder{color:var(--muted2)}
     </div>
   </div>
   <div class="sb-bottom">
+    <button class="sb-load" onclick="openDriveModal()" id="drive-btn" style="margin-bottom:6px;background:var(--blue2);border-color:rgba(77,166,255,0.25);color:var(--blue)">☁ Connect Google Drive</button>
+    <button class="sb-load" onclick="forcePushToDrive()" style="margin-bottom:6px;background:var(--green2);border-color:rgba(46,204,143,0.25);color:var(--green)">↑ Push data to Drive</button>
     <button class="sb-export" onclick="exportExcel()">↓ Download Excel</button>
     <button class="sb-load" onclick="exportPDF()" style="margin-top:6px">▤ Download PDF summary</button>
     <button class="sb-load" onclick="document.getElementById('file-input').click()" style="margin-top:6px">↑ Load Excel file</button>
@@ -308,7 +328,8 @@ input::placeholder{color:var(--muted2)}
       <div class="topbar-sub" id="topbar-sub">Portfolio overview</div>
     </div>
     <div class="topbar-actions">
-      <span class="dot dot-green" id="status-dot"></span>
+      <span class="sync-pill local" id="sync-pill" onclick="openDriveModal()" title="Click to connect Google Drive">☁ Local only</span>
+      <span class="dot dot-green" id="status-dot" style="margin-left:6px"></span>
       <span id="status-msg" style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted)">Ready</span>
     </div>
   </div>
@@ -516,6 +537,23 @@ input::placeholder{color:var(--muted2)}
 </div><!-- /main -->
 <div id="toast"></div>
 
+<div class="modal-overlay" id="drive-modal">
+  <div class="modal-box">
+    <h2>☁ Connect Google Drive</h2>
+    <p>Your data saves to <strong>portfolio_data.json</strong> in your Google Drive and syncs across every browser and device automatically.</p>
+    <div class="modal-step"><div class="modal-step-n">1</div><div>Go to <strong>console.cloud.google.com</strong> → New Project → Enable the <strong>Google Drive API</strong>.</div></div>
+    <div class="modal-step"><div class="modal-step-n">2</div><div>Go to <strong>APIs & Services → Credentials → Create OAuth 2.0 Client ID</strong> (Web Application). Under "Authorized JavaScript origins" add your GitHub Pages URL e.g. <code>https://yourname.github.io</code>.</div></div>
+    <div class="modal-step"><div class="modal-step-n">3</div><div>Create an <strong>API Key</strong> under Credentials too. Paste both below.</div></div>
+    <div class="fg" style="margin-top:.8rem"><span class="fl">OAuth Client ID</span><input type="text" id="drive-client-id" placeholder="xxxxxxxxxx.apps.googleusercontent.com" style="width:100%;margin-top:5px"></div>
+    <div class="fg" style="margin-top:.8rem"><span class="fl">API Key</span><input type="text" id="drive-api-key" placeholder="AIza..." style="width:100%;margin-top:5px"></div>
+    <div class="modal-actions">
+      <button class="btn" onclick="closeDriveModal()">Cancel</button>
+      <button class="btn btn-amber" onclick="forcePushToDrive()" id="force-push-btn" style="display:none">↑ Force upload local data</button>
+      <button class="btn btn-teal" onclick="initDrive()">Connect &amp; Sync</button>
+    </div>
+  </div>
+</div>
+
 <script>
 // ═══════════════════════════════════════════════════════════ DATA
 const BASE = [
@@ -551,6 +589,7 @@ const PAGE_META = {
 // ═══════════════════════════════════════════════════════════ HELPERS
 function save(){
   try{localStorage.setItem('v2_val',JSON.stringify(valEntries));localStorage.setItem('v2_dep',JSON.stringify(depEntries));}catch(e){}
+  driveDebouncedSave();
 }
 function today(){return new Date().toISOString().split('T')[0];}
 function thisSunday(){const d=new Date();d.setDate(d.getDate()-d.getDay());return d.toISOString().split('T')[0];}
@@ -614,6 +653,7 @@ window.addEventListener('load',()=>{
   });
   const csvInput=document.getElementById('csv-input');
   if(csvInput) csvInput.addEventListener('change', handleCSVImport);
+  driveAutoConnect();
 });
 
 // ═══════════════════════════════════════════════════════════ KPI STRIP
@@ -1397,6 +1437,238 @@ function handleCSVImport(e){
   };
   reader.readAsText(file);
 }
+
+
+// ══════════════════════════════════════════════════════════ GOOGLE DRIVE SYNC
+const DRIVE_FILE_NAME = 'portfolio_data.json';
+let driveState = {
+  clientId: localStorage.getItem('_drive_client_id') || '',
+  apiKey:   localStorage.getItem('_drive_api_key')   || '',
+  fileId:   localStorage.getItem('_drive_file_id')   || '',
+  token:    '',
+  connected: false,
+};
+let driveSaveTimer = null;
+
+function setSyncPill(state, label) {
+  const pill = document.getElementById('sync-pill');
+  if (!pill) return;
+  pill.className = 'sync-pill ' + state;
+  pill.textContent = label;
+}
+
+function openDriveModal() {
+  const el = document.getElementById('drive-modal');
+  if (el) {
+    el.classList.add('open');
+    const ci = document.getElementById('drive-client-id');
+    const ak = document.getElementById('drive-api-key');
+    if (ci) ci.value = driveState.clientId;
+    if (ak) ak.value = driveState.apiKey;
+  }
+}
+function closeDriveModal() {
+  const el = document.getElementById('drive-modal');
+  if (el) el.classList.remove('open');
+}
+
+function initDrive() {
+  const clientId = (document.getElementById('drive-client-id').value || '').trim();
+  const apiKey   = (document.getElementById('drive-api-key').value   || '').trim();
+  if (!clientId || !apiKey) { showToast('Enter both Client ID and API Key', true); return; }
+  driveState.clientId = clientId;
+  driveState.apiKey   = apiKey;
+  try {
+    localStorage.setItem('_drive_client_id', clientId);
+    localStorage.setItem('_drive_api_key', apiKey);
+  } catch(e) {}
+  closeDriveModal();
+  driveSignIn();
+}
+
+function driveAutoConnect() {
+  if (driveState.clientId && driveState.apiKey) {
+    driveSignIn(true); // silent=true, don't prompt if not already signed in
+  }
+}
+
+function driveSignIn(silent) {
+  setSyncPill('syncing', '↻ Connecting...');
+  // Load the GAPI client library
+  if (typeof google === 'undefined' || !google.accounts) {
+    // GSI not loaded yet, retry shortly
+    setTimeout(() => driveSignIn(silent), 1500);
+    return;
+  }
+  // Use Google Identity Services token client
+  const tokenClient = google.accounts.oauth2.initTokenClient({
+    client_id: driveState.clientId,
+    scope: 'https://www.googleapis.com/auth/drive.file',
+    callback: (resp) => {
+      if (resp.error) {
+        setSyncPill('error', '☁ Auth failed');
+        if (!silent) showToast('Google auth failed: ' + resp.error, true);
+        return;
+      }
+      driveState.token = resp.access_token;
+      driveState.connected = true;
+      const btn = document.getElementById('drive-btn');
+      if (btn) { btn.textContent = '✓ Drive connected'; btn.style.color = 'var(--green)'; btn.style.borderColor = 'rgba(46,204,143,0.3)'; }
+      const fpBtn = document.getElementById('force-push-btn');
+      if (fpBtn) fpBtn.style.display = 'inline-flex';
+      showToast('☁ Google Drive connected — loading your data...');
+      driveLoadOrCreate();
+    },
+  });
+  if (silent) {
+    tokenClient.requestAccessToken({ prompt: 'none' });
+  } else {
+    tokenClient.requestAccessToken({ prompt: 'consent' });
+  }
+}
+
+async function driveLoadOrCreate() {
+  setSyncPill('syncing', '<span class="spin">↻</span> Syncing...');
+  try {
+    // Search for existing file
+    let fileId = driveState.fileId;
+    if (!fileId) {
+      const search = await driveGET(
+        `https://www.googleapis.com/drive/v3/files?q=name='${DRIVE_FILE_NAME}' and trashed=false&fields=files(id,name,modifiedTime)&spaces=drive`
+      );
+      const files = search.files || [];
+      if (files.length > 0) {
+        fileId = files[0].id;
+        driveState.fileId = fileId;
+        try { localStorage.setItem('_drive_file_id', fileId); } catch(e) {}
+      }
+    }
+    if (fileId) {
+      // Load existing data from Drive — Drive always wins (it is the source of truth)
+      const data = await driveGET(`https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`);
+      if (data && (data.valEntries || data.depEntries)) {
+        // Use whichever has MORE entries (handles first-time upload from local)
+        if (data.valEntries) {
+          valEntries = data.valEntries.length >= valEntries.length
+            ? data.valEntries
+            : valEntries; // local has more (not yet pushed) — we'll push below
+        }
+        if (data.depEntries) {
+          depEntries = data.depEntries.length >= depEntries.length
+            ? data.depEntries
+            : depEntries;
+        }
+        try {
+          localStorage.setItem('v2_val', JSON.stringify(valEntries));
+          localStorage.setItem('v2_dep', JSON.stringify(depEntries));
+        } catch(e) {}
+        buildKPIs(); buildDash(); buildValTable(); buildHistory();
+        buildGoalProgress(); buildGoalProgressGHS(); updateBadges();
+        setSyncPill('synced', '☁ Synced');
+        showToast('☁ Data loaded from Google Drive');
+        // If local had more entries, push them up to Drive now
+        if ((data.valEntries && valEntries.length > data.valEntries.length) ||
+            (data.depEntries && depEntries.length > data.depEntries.length)) {
+          await driveSaveNow();
+        }
+      } else {
+        // File exists but empty — push local data up
+        await driveSaveNow();
+      }
+    } else {
+      // No file yet — upload all local data to Drive now
+      await driveSaveNow();
+    }
+  } catch(err) {
+    setSyncPill('error', '☁ Sync error');
+    console.error('Drive load error:', err);
+    showToast('Drive sync issue — working locally', true);
+  }
+}
+
+async function driveSaveNow() {
+  if (!driveState.connected || !driveState.token) return;
+  setSyncPill('syncing', '<span class="spin">↻</span> Saving...');
+  const payload = JSON.stringify({
+    valEntries,
+    depEntries,
+    savedAt: new Date().toISOString(),
+    version: 1,
+  });
+  try {
+    const metadata = { name: DRIVE_FILE_NAME, mimeType: 'application/json' };
+    const boundary = 'drive_boundary_xyz';
+    const body = [
+      '--' + boundary,
+      'Content-Type: application/json; charset=UTF-8',
+      '',
+      JSON.stringify(metadata),
+      '--' + boundary,
+      'Content-Type: application/json',
+      '',
+      payload,
+      '--' + boundary + '--',
+    ].join('\r\n');
+
+    let url, method;
+    if (driveState.fileId) {
+      url = `https://www.googleapis.com/upload/drive/v3/files/${driveState.fileId}?uploadType=multipart`;
+      method = 'PATCH';
+    } else {
+      url = 'https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart';
+      method = 'POST';
+    }
+    const resp = await fetch(url, {
+      method,
+      headers: {
+        'Authorization': 'Bearer ' + driveState.token,
+        'Content-Type': 'multipart/related; boundary=' + boundary,
+      },
+      body,
+    });
+    const result = await resp.json();
+    if (result.id) {
+      if (!driveState.fileId) {
+        driveState.fileId = result.id;
+        try { localStorage.setItem('_drive_file_id', result.id); } catch(e) {}
+      }
+      setSyncPill('synced', '☁ Synced ' + new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}));
+    } else {
+      throw new Error(result.error?.message || 'Unknown Drive error');
+    }
+  } catch(err) {
+    setSyncPill('error', '☁ Save failed');
+    console.error('Drive save error:', err);
+  }
+}
+
+function driveDebouncedSave() {
+  clearTimeout(driveSaveTimer);
+  driveSaveTimer = setTimeout(driveSaveNow, 2000); // save 2s after last change
+}
+
+async function forcePushToDrive() {
+  if (!driveState.connected || !driveState.token) {
+    showToast('Connect Google Drive first', true);
+    return;
+  }
+  showToast('Uploading all data to Drive...');
+  await driveSaveNow();
+  showToast('✓ All data uploaded to Google Drive');
+}
+
+async function driveGET(url) {
+  const resp = await fetch(url, {
+    headers: { 'Authorization': 'Bearer ' + driveState.token }
+  });
+  return resp.json();
+}
+
+// Close modal on overlay click
+document.getElementById('drive-modal')?.addEventListener('click', function(e) {
+  if (e.target === this) closeDriveModal();
+});
+
 
 // Make Array.findLastIndex work in older browsers
 if(!Array.prototype.findLastIndex){
