@@ -40,7 +40,23 @@ body{background:var(--navy);color:var(--white);font-family:'Syne',sans-serif;dis
 .sb-logo h1{font-size:1.1rem;font-weight:800;letter-spacing:-.02em;line-height:1.1}
 .sb-logo h1 span{color:var(--teal)}
 .sb-logo p{font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);margin-top:4px;letter-spacing:.04em}
-.sb-section{padding:.7rem .8rem .3rem;font-family:'DM Mono',monospace;font-size:9px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted2)}
+.sync-pill{display:inline-flex;align-items:center;gap:5px;font-family:'DM Mono',monospace;font-size:10px;padding:3px 9px;border-radius:20px;cursor:pointer;transition:all .2s}
+  .sync-pill.local{background:var(--amber2);color:var(--amber);border:1px solid rgba(245,166,35,0.25)}
+  .sync-pill.syncing{background:var(--purple2);color:var(--purple);border:1px solid rgba(139,127,255,0.25)}
+  .sync-pill.synced{background:var(--green2);color:var(--green);border:1px solid rgba(46,204,143,0.25)}
+  .sync-pill.error{background:var(--red2);color:var(--red);border:1px solid rgba(255,92,92,0.25)}
+  .spin{display:inline-block;animation:spin 1s linear infinite}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.65);z-index:200;display:none;align-items:center;justify-content:center;backdrop-filter:blur(4px)}
+  .modal-overlay.open{display:flex}
+  .modal-box{background:var(--navy2);border:1px solid var(--border2);border-radius:16px;padding:2rem;max-width:500px;width:92%}
+  .modal-box h2{font-size:1.1rem;font-weight:800;margin-bottom:.4rem}
+  .modal-box p{font-size:12px;color:var(--muted);line-height:1.7;margin-bottom:.8rem}
+  .modal-step{display:flex;gap:10px;align-items:flex-start;margin-bottom:.75rem;font-size:12px;line-height:1.6}
+  .modal-step-n{width:20px;height:20px;border-radius:50%;background:var(--teal);color:var(--navy);font-weight:800;font-size:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
+  .modal-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:1.2rem}
+  code{background:var(--navy3);padding:1px 6px;border-radius:4px;font-family:'DM Mono',monospace;font-size:11px}
+  .sb-section{padding:.7rem .8rem .3rem;font-family:'DM Mono',monospace;font-size:9px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted2)}
 .sb-nav{flex:1;overflow-y:auto;padding:.3rem .6rem .6rem}
 .sb-nav::-webkit-scrollbar{width:3px}
 .sb-nav::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
@@ -240,23 +256,24 @@ input::placeholder{color:var(--muted2)}
 ::-webkit-scrollbar-track{background:transparent}
 ::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
 
-  /* ── DRIVE SYNC */
-  .sync-pill{display:inline-flex;align-items:center;gap:5px;font-family:'DM Mono',monospace;font-size:10px;padding:3px 9px;border-radius:20px;cursor:pointer;transition:all .2s}
-  .sync-pill.local{background:var(--amber2);color:var(--amber);border:1px solid rgba(245,166,35,0.25)}
-  .sync-pill.syncing{background:var(--purple2);color:var(--purple);border:1px solid rgba(139,127,255,0.25)}
-  .sync-pill.synced{background:var(--green2);color:var(--green);border:1px solid rgba(46,204,143,0.25)}
-  .sync-pill.error{background:var(--red2);color:var(--red);border:1px solid rgba(255,92,92,0.25)}
-  .spin{display:inline-block;animation:spin 1s linear infinite}
-  @keyframes spin{to{transform:rotate(360deg)}}
-  .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.65);z-index:200;display:none;align-items:center;justify-content:center;backdrop-filter:blur(4px)}
-  .modal-overlay.open{display:flex}
-  .modal-box{background:var(--navy2);border:1px solid var(--border2);border-radius:16px;padding:2rem;max-width:500px;width:92%}
-  .modal-box h2{font-size:1.1rem;font-weight:800;margin-bottom:.4rem}
-  .modal-box p{font-size:12px;color:var(--muted);line-height:1.7;margin-bottom:.8rem}
-  .modal-step{display:flex;gap:10px;align-items:flex-start;margin-bottom:.75rem;font-size:12px;line-height:1.6}
-  .modal-step-n{width:20px;height:20px;border-radius:50%;background:var(--teal);color:var(--navy);font-weight:800;font-size:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
-  .modal-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:1.2rem}
-  code{background:var(--navy3);padding:1px 6px;border-radius:4px;font-family:'DM Mono',monospace;font-size:11px}
+  /* ── TRENDS & ALERTS */
+  .momentum-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:1rem;margin-bottom:.7rem;display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center}
+  .momentum-bar-wrap{height:5px;background:var(--navy3);border-radius:3px;overflow:hidden;margin-top:6px;width:100%}
+  .momentum-bar-fill{height:100%;border-radius:3px;transition:width .4s}
+  .signal-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:1rem;margin-bottom:.7rem}
+  .signal-badge{display:inline-block;font-family:'DM Mono',monospace;font-size:10px;font-weight:700;padding:3px 10px;border-radius:20px;margin-bottom:.5rem}
+  .signal-badge.buy{background:var(--green2);color:var(--green);border:1px solid rgba(46,204,143,0.3)}
+  .signal-badge.hold{background:var(--amber2);color:var(--amber);border:1px solid rgba(245,166,35,0.3)}
+  .signal-badge.review{background:var(--red2);color:var(--red);border:1px solid rgba(255,92,92,0.3)}
+  .signal-badge.watch{background:var(--blue2);color:var(--blue);border:1px solid rgba(77,166,255,0.3)}
+  .alert-row{display:grid;grid-template-columns:1fr 1fr auto auto;gap:8px;align-items:center;padding:8px 0;border-bottom:1px solid var(--border);font-size:12px}
+  .alert-row:last-child{border-bottom:none}
+  .alert-fired{background:var(--amber2);border:1px solid rgba(245,166,35,0.3);border-radius:8px;padding:.7rem 1rem;margin-bottom:.5rem;font-size:12px;display:flex;align-items:center;gap:8px}
+  .alert-fired.danger{background:var(--red2);border-color:rgba(255,92,92,0.3)}
+  .alert-fired.success{background:var(--green2);border-color:rgba(46,204,143,0.3)}
+  .cagr-row{display:grid;grid-template-columns:1fr 80px 90px 90px 80px;gap:8px;align-items:center;padding:9px 0;border-bottom:1px solid var(--border);font-size:12px}
+  .cagr-row:last-child{border-bottom:none}
+  .cagr-hdr{font-family:'DM Mono',monospace;font-size:9px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);padding:0 0 6px;border-bottom:1px solid var(--border);display:grid;grid-template-columns:1fr 80px 90px 90px 80px;gap:8px;margin-bottom:4px}
 @media(max-width:700px){
   .sidebar{display:none}
   .kpi-strip{grid-template-columns:repeat(2,1fr)}
@@ -293,6 +310,9 @@ input::placeholder{color:var(--muted2)}
     </div>
     <div class="sb-divider"></div>
     <div class="sb-section">Analytics</div>
+    <div class="sb-item" data-page="trends" onclick="nav(this)">
+      <span class="sb-icon">🔔</span> Trends &amp; Alerts
+    </div>
     <div class="sb-item" data-page="weekly-diff" onclick="nav(this)">
       <span class="sb-icon">📅</span> Week-by-Week
     </div>
@@ -343,7 +363,7 @@ input::placeholder{color:var(--muted2)}
         <table class="tbl">
           <thead><tr>
             <th style="text-align:left">Investment</th>
-            <th>Deposited</th><th>Latest value</th><th>P&amp;L</th><th>% Return</th><th>Trend</th><th style="width:90px">Last 8 weeks</th>
+            <th>Start date</th><th>Days held</th><th>Deposited</th><th>Latest value</th><th>P&amp;L</th><th>% Return</th><th>Trend</th><th style="width:90px">Last 8 weeks</th>
           </tr></thead>
           <tbody id="dash-body"></tbody>
         </table>
@@ -491,6 +511,47 @@ input::placeholder{color:var(--muted2)}
 
     </div>
 
+    <!-- ── TRENDS & ALERTS ──────────────────── -->
+    <div class="page" id="page-trends">
+      <div class="card">
+        <div class="card-title">Alert settings</div>
+        <p style="font-size:12px;color:var(--muted);margin-bottom:1rem">Set thresholds per investment. The app flags when any position crosses them. Analysis only — not financial advice.</p>
+        <div style="display:flex;gap:10px;align-items:end;flex-wrap:wrap;margin-bottom:.5rem">
+          <div class="fg"><span class="fl">Investment</span><select id="alert-inv" style="width:180px"><option value="">choose</option></select></div>
+          <div class="fg"><span class="fl">Alert type</span>
+            <select id="alert-type" style="width:160px">
+              <option value="above">Value rises above</option>
+              <option value="below">Value falls below</option>
+              <option value="return_above">% return rises above</option>
+              <option value="return_below">% return falls below</option>
+              <option value="loss_pct">Loss exceeds %</option>
+            </select>
+          </div>
+          <div class="fg"><span class="fl">Threshold</span><input type="number" id="alert-threshold" placeholder="e.g. 150" step="0.1" style="width:110px"></div>
+          <button class="btn btn-teal" onclick="saveAlert()">+ Add alert</button>
+        </div>
+        <div id="alert-list" style="margin-top:.8rem"></div>
+      </div>
+      <div class="card">
+        <div class="card-title">🔔 Active alerts</div>
+        <div id="alerts-fired"></div>
+      </div>
+      <div class="card">
+        <div class="card-title">📈 Momentum signals</div>
+        <p style="font-size:12px;color:var(--muted);margin-bottom:1rem">Direction and strength of each investment over your last 4 weekly entries.</p>
+        <div id="momentum-grid"></div>
+      </div>
+      <div class="card">
+        <div class="card-title">🎯 Buy / Hold / Review signals</div>
+        <p style="font-size:12px;color:var(--muted);margin-bottom:1rem">Based on entry price, current value, days held and recent momentum. <strong style="color:var(--amber)">Always do your own research before acting.</strong></p>
+        <div id="signals-grid"></div>
+      </div>
+      <div class="card">
+        <div class="card-title">📊 Annualised return (CAGR) — fair comparison across all investments</div>
+        <div id="cagr-grid"></div>
+      </div>
+    </div>
+
     <!-- ── WEEK BY WEEK ───────────────────────── -->
     <div class="page" id="page-weekly-diff">
       <div class="card">
@@ -541,9 +602,9 @@ input::placeholder{color:var(--muted2)}
   <div class="modal-box">
     <h2>☁ Connect Google Drive</h2>
     <p>Your data saves to <strong>portfolio_data.json</strong> in your Google Drive and syncs across every browser and device automatically.</p>
-    <div class="modal-step"><div class="modal-step-n">1</div><div>Go to <strong>console.cloud.google.com</strong> → New Project → Enable the <strong>Google Drive API</strong>.</div></div>
-    <div class="modal-step"><div class="modal-step-n">2</div><div>Go to <strong>APIs & Services → Credentials → Create OAuth 2.0 Client ID</strong> (Web Application). Under "Authorized JavaScript origins" add your GitHub Pages URL e.g. <code>https://yourname.github.io</code>.</div></div>
-    <div class="modal-step"><div class="modal-step-n">3</div><div>Create an <strong>API Key</strong> under Credentials too. Paste both below.</div></div>
+    <div class="modal-step"><div class="modal-step-n">1</div><div>Go to <strong>console.cloud.google.com</strong> → your project → enable <strong>Google Drive API</strong>.</div></div>
+    <div class="modal-step"><div class="modal-step-n">2</div><div>Credentials → Create <strong>OAuth 2.0 Client ID</strong> (Web Application). Add <code>https://senatay3.github.io</code> under Authorized JavaScript origins.</div></div>
+    <div class="modal-step"><div class="modal-step-n">3</div><div>Create an <strong>API Key</strong> under Credentials. Paste both below.</div></div>
     <div class="fg" style="margin-top:.8rem"><span class="fl">OAuth Client ID</span><input type="text" id="drive-client-id" placeholder="xxxxxxxxxx.apps.googleusercontent.com" style="width:100%;margin-top:5px"></div>
     <div class="fg" style="margin-top:.8rem"><span class="fl">API Key</span><input type="text" id="drive-api-key" placeholder="AIza..." style="width:100%;margin-top:5px"></div>
     <div class="modal-actions">
@@ -557,16 +618,17 @@ input::placeholder{color:var(--muted2)}
 <script>
 // ═══════════════════════════════════════════════════════════ DATA
 const BASE = [
-  {id:'alto',    name:'Alto Ingredients Inc',      short:'Alto',         platform:'REVOLUT',cur:'EUR',deposited:86.61, lastVal:112.21,sector:'Chemicals'},
-  {id:'vanguard',name:'Vanguard FTSE All World',   short:'V. FTSE',      platform:'REVOLUT',cur:'EUR',deposited:90.00, lastVal:90.55, sector:'Global ETF'},
-  {id:'netflix', name:'Netflix',                   short:'Netflix',      platform:'REVOLUT',cur:'EUR',deposited:42.33, lastVal:44.08, sector:'Streaming'},
-  {id:'amundi',  name:'Amundi S&P 500 ETF',        short:'Amundi S&P',   platform:'REVOLUT',cur:'EUR',deposited:40.00, lastVal:39.11, sector:'US ETF'},
-  {id:'vsp500',  name:'Vanguard S&P 500 Dist',     short:'V. S&P 500',   platform:'REVOLUT',cur:'EUR',deposited:40.00, lastVal:39.10, sector:'US ETF'},
-  {id:'nvidia',  name:'Nvidia',                    short:'Nvidia',       platform:'REVOLUT',cur:'EUR',deposited:17.60, lastVal:17.03, sector:'Tech'},
-  {id:'nano',    name:'Nano Nuclear Energy',       short:'Nano Nuclear', platform:'REVOLUT',cur:'EUR',deposited:17.29, lastVal:16.76, sector:'Energy'},
-  {id:'ge',      name:'GE Aerospace',              short:'GE Aero',      platform:'REVOLUT',cur:'EUR',deposited:17.06, lastVal:16.50, sector:'Aerospace'},
-  {id:'ic',      name:'IC Liquidity Fund',         short:'IC Fund',      platform:'IC',     cur:'GHS',deposited:2100,  lastVal:2178.71,sector:'Fixed Income'},
-  {id:'plus',    name:'Plus Invest',               short:'Plus Invest',  platform:'PLUS',   cur:'GHS',deposited:1500,  lastVal:1526.70,sector:'Fixed Income'},
+  {id:'alto',    name:'Alto Ingredients Inc',      short:'Alto',         platform:'REVOLUT',cur:'EUR',deposited:117.63,lastVal:146.73,sector:'Chemicals',    startDate:'2026-03-05'},
+  {id:'vanguard',name:'Vanguard FTSE All World',   short:'V. FTSE',      platform:'REVOLUT',cur:'EUR',deposited:690.09,lastVal:96.04, sector:'Global ETF',   startDate:'2026-01-15'},
+  {id:'netflix', name:'Netflix',                   short:'Netflix',      platform:'REVOLUT',cur:'EUR',deposited:42.33, lastVal:41.37, sector:'Streaming',    startDate:'2026-01-26'},
+  {id:'amundi',  name:'Amundi S&P 500 ETF',        short:'Amundi S&P',   platform:'REVOLUT',cur:'EUR',deposited:40.00, lastVal:41.65, sector:'US ETF',       startDate:'2026-01-15'},
+  {id:'vsp500',  name:'Vanguard S&P 500 Dist',     short:'V. S&P 500',   platform:'REVOLUT',cur:'EUR',deposited:40.00, lastVal:41.64, sector:'US ETF',       startDate:'2026-01-15'},
+  {id:'nvidia',  name:'Nvidia',                    short:'Nvidia',       platform:'REVOLUT',cur:'EUR',deposited:17.60, lastVal:17.50, sector:'Tech',          startDate:'2025-11-03'},
+  {id:'nano',    name:'Nano Nuclear Energy',       short:'Nano Nuclear', platform:'REVOLUT',cur:'EUR',deposited:17.29, lastVal:19.46, sector:'Energy',        startDate:'2026-03-11'},
+  {id:'ge',      name:'GE Aerospace',              short:'GE Aero',      platform:'REVOLUT',cur:'EUR',deposited:105.07,lastVal:18.97, sector:'Aerospace',     startDate:'2026-04-21'},
+  {id:'spacex',  name:'SpaceX',                   short:'SpaceX',       platform:'REVOLUT',cur:'EUR',deposited:17.36, lastVal:11.76, sector:'Aerospace',     startDate:'2026-06-12'},
+  {id:'ic',      name:'IC Liquidity Fund',         short:'IC Fund',      platform:'IC',     cur:'GHS',deposited:3700,  lastVal:3198.73,sector:'Fixed Income',  startDate:'2025-11-17'},
+  {id:'plus',    name:'Plus Invest',               short:'Plus Invest',  platform:'PLUS',   cur:'GHS',deposited:1500,  lastVal:1533.95,sector:'Fixed Income',  startDate:'2026-01-07'},
 ];
 
 let valEntries = JSON.parse(localStorage.getItem('v2_val')||'[]');
@@ -579,6 +641,7 @@ const PAGE_META = {
   'performance':  {title:'Performance',     sub:'Rankings & returns by investment'},
   'valuations':   {title:'Weekly Entry',    sub:'Log your Sunday valuations'},
   'deposits':     {title:'Log a Deposit',   sub:'Record a new top-up'},
+  'trends':       {title:'Trends & Alerts', sub:'Momentum signals, alerts and buy/sell analysis'},
   'weekly-diff':  {title:'Week-by-Week',    sub:'Compare changes between entries'},
   'dep-history':  {title:'Deposit Log',     sub:'All deposits recorded'},
   'history':      {title:'Full History',    sub:'All activity — valuations & deposits'},
@@ -598,8 +661,8 @@ function fmtPct(n){return (n>=0?'+':'')+parseFloat(n*100).toFixed(1)+'%';}
 function colorClass(n){return n>0?'pos':n<0?'neg':'';}
 
 function getTotalDeposited(id){
-  const base=BASE.find(i=>i.id===id).deposited;
-  return base+depEntries.filter(d=>d.id===id).reduce((s,d)=>s+d.amount,0);
+  const fromDeps=depEntries.filter(d=>d.id===id).reduce((s,d)=>s+d.amount,0);
+  return fromDeps>0?fromDeps:BASE.find(i=>i.id===id).deposited;
 }
 function getLastVal(id){
   for(let i=valEntries.length-1;i>=0;i--)if(valEntries[i].values[id]!==undefined)return valEntries[i].values[id];
@@ -629,6 +692,7 @@ function nav(el){
   if(p==='history'){buildHistory();}
   if(p==='profits'){buildProfits();}
   if(p==='valuations'){buildValTable();}
+  if(p==='trends'){buildTrends();}
   if(p==='new-investment'){buildNIList();}
 }
 
@@ -637,6 +701,42 @@ window.addEventListener('load',()=>{
   document.getElementById('val-date').value=thisSunday();
   document.getElementById('dep-date').value=today();
   document.getElementById('ni-date').value=today();
+  // Seed correct deposit history if localStorage is empty or missing entries
+  const MASTER_DEPOSITS = [
+    {type:'deposit',date:'2026-03-05',id:'alto',    name:'Alto Ingredients Inc',   amount:86.61, currency:'EUR',platform:'REVOLUT',prevTotal:0,     newTotal:86.61, savedAt:'2026-03-05T00:00:00.000Z'},
+    {type:'deposit',date:'2026-05-01',id:'alto',    name:'Alto Ingredients Inc',   amount:31.02, currency:'EUR',platform:'REVOLUT',prevTotal:86.61,  newTotal:117.63,savedAt:'2026-05-01T00:00:00.000Z'},
+    {type:'deposit',date:'2026-01-15',id:'vanguard',name:'Vanguard FTSE All World',amount:20.00, currency:'EUR',platform:'REVOLUT',prevTotal:0,      newTotal:20.00, savedAt:'2026-01-15T00:00:00.000Z'},
+    {type:'deposit',date:'2026-01-19',id:'vanguard',name:'Vanguard FTSE All World',amount:20.00, currency:'EUR',platform:'REVOLUT',prevTotal:20.00,  newTotal:40.00, savedAt:'2026-01-19T00:00:00.000Z'},
+    {type:'deposit',date:'2026-02-23',id:'vanguard',name:'Vanguard FTSE All World',amount:40.00, currency:'EUR',platform:'REVOLUT',prevTotal:40.00,  newTotal:80.00, savedAt:'2026-02-23T00:00:00.000Z'},
+    {type:'deposit',date:'2026-04-21',id:'vanguard',name:'Vanguard FTSE All World',amount:10.00, currency:'EUR',platform:'REVOLUT',prevTotal:80.00,  newTotal:90.00, savedAt:'2026-04-21T00:00:00.000Z'},
+    {type:'deposit',date:'2026-06-22',id:'vanguard',name:'Vanguard FTSE All World',amount:100.00,currency:'EUR',platform:'REVOLUT',prevTotal:90.00,  newTotal:190.00,savedAt:'2026-06-22T00:00:00.000Z'},
+    {type:'deposit',date:'2026-07-27',id:'vanguard',name:'Vanguard FTSE All World',amount:400.00,currency:'EUR',platform:'REVOLUT',prevTotal:190.00, newTotal:590.00,savedAt:'2026-07-27T00:00:00.000Z'},
+    {type:'deposit',date:'2026-07-27',id:'vanguard',name:'Vanguard FTSE All World',amount:100.09,currency:'EUR',platform:'REVOLUT',prevTotal:590.00, newTotal:690.09,savedAt:'2026-07-27T06:00:00.000Z'},
+    {type:'deposit',date:'2026-01-26',id:'netflix', name:'Netflix',               amount:42.33, currency:'EUR',platform:'REVOLUT',prevTotal:0,      newTotal:42.33, savedAt:'2026-01-26T00:00:00.000Z'},
+    {type:'deposit',date:'2026-01-15',id:'amundi',  name:'Amundi S&P 500 ETF',    amount:20.00, currency:'EUR',platform:'REVOLUT',prevTotal:0,      newTotal:20.00, savedAt:'2026-01-15T00:00:00.000Z'},
+    {type:'deposit',date:'2026-01-19',id:'amundi',  name:'Amundi S&P 500 ETF',    amount:20.00, currency:'EUR',platform:'REVOLUT',prevTotal:20.00,  newTotal:40.00, savedAt:'2026-01-19T00:00:00.000Z'},
+    {type:'deposit',date:'2026-01-15',id:'vsp500',  name:'Vanguard S&P 500 Dist', amount:20.00, currency:'EUR',platform:'REVOLUT',prevTotal:0,      newTotal:20.00, savedAt:'2026-01-15T00:00:00.000Z'},
+    {type:'deposit',date:'2026-01-19',id:'vsp500',  name:'Vanguard S&P 500 Dist', amount:20.00, currency:'EUR',platform:'REVOLUT',prevTotal:20.00,  newTotal:40.00, savedAt:'2026-01-19T00:00:00.000Z'},
+    {type:'deposit',date:'2025-11-03',id:'nvidia',  name:'Nvidia',                amount:17.60, currency:'EUR',platform:'REVOLUT',prevTotal:0,      newTotal:17.60, savedAt:'2025-11-03T00:00:00.000Z'},
+    {type:'deposit',date:'2026-03-11',id:'nano',    name:'Nano Nuclear Energy',   amount:17.29, currency:'EUR',platform:'REVOLUT',prevTotal:0,      newTotal:17.29, savedAt:'2026-03-11T00:00:00.000Z'},
+    {type:'deposit',date:'2026-04-21',id:'ge',      name:'GE Aerospace',          amount:17.06, currency:'EUR',platform:'REVOLUT',prevTotal:0,      newTotal:17.06, savedAt:'2026-04-21T00:00:00.000Z'},
+    {type:'deposit',date:'2026-08-03',id:'ge',      name:'GE Aerospace',          amount:88.01, currency:'EUR',platform:'REVOLUT',prevTotal:17.06,  newTotal:105.07,savedAt:'2026-08-03T00:00:00.000Z'},
+    {type:'deposit',date:'2026-06-12',id:'spacex',  name:'SpaceX',               amount:17.36, currency:'EUR',platform:'REVOLUT',prevTotal:0,      newTotal:17.36, savedAt:'2026-06-12T00:00:00.000Z'},
+    {type:'deposit',date:'2025-11-17',id:'ic',      name:'IC Liquidity Fund',     amount:1000,  currency:'GHS',platform:'IC',     prevTotal:0,      newTotal:1000,  savedAt:'2025-11-17T00:00:00.000Z'},
+    {type:'deposit',date:'2025-12-07',id:'ic',      name:'IC Liquidity Fund',     amount:500,   currency:'GHS',platform:'IC',     prevTotal:1000,   newTotal:1500,  savedAt:'2025-12-07T00:00:00.000Z'},
+    {type:'deposit',date:'2026-01-27',id:'ic',      name:'IC Liquidity Fund',     amount:200,   currency:'GHS',platform:'IC',     prevTotal:1500,   newTotal:1700,  savedAt:'2026-01-27T00:00:00.000Z'},
+    {type:'deposit',date:'2026-02-23',id:'ic',      name:'IC Liquidity Fund',     amount:200,   currency:'GHS',platform:'IC',     prevTotal:1700,   newTotal:1900,  savedAt:'2026-02-23T00:00:00.000Z'},
+    {type:'deposit',date:'2026-02-23',id:'ic',      name:'IC Liquidity Fund',     amount:200,   currency:'GHS',platform:'IC',     prevTotal:1900,   newTotal:2100,  savedAt:'2026-02-23T06:00:00.000Z'},
+    {type:'deposit',date:'2026-05-17',id:'ic',      name:'IC Liquidity Fund',     amount:1000,  currency:'GHS',platform:'IC',     prevTotal:2100,   newTotal:3100,  savedAt:'2026-05-17T00:00:00.000Z'},
+    {type:'deposit',date:'2026-08-27',id:'ic',      name:'IC Liquidity Fund',     amount:600,   currency:'GHS',platform:'IC',     prevTotal:3100,   newTotal:3700,  savedAt:'2026-08-27T00:00:00.000Z'},
+    {type:'deposit',date:'2026-01-07',id:'plus',    name:'Plus Invest',           amount:500,   currency:'GHS',platform:'PLUS',   prevTotal:0,      newTotal:500,   savedAt:'2026-01-07T00:00:00.000Z'},
+    {type:'deposit',date:'2026-02-04',id:'plus',    name:'Plus Invest',           amount:1000,  currency:'GHS',platform:'PLUS',   prevTotal:500,    newTotal:1500,  savedAt:'2026-02-04T00:00:00.000Z'},
+  ];
+  // Only seed if localStorage has fewer entries than master (first load or new device)
+  if(depEntries.length < MASTER_DEPOSITS.length){
+    depEntries = MASTER_DEPOSITS;
+    try{localStorage.setItem('v2_dep',JSON.stringify(depEntries));}catch(e){}
+  }
   populateDepSelect();
   buildKPIs(); buildDash(); buildValTable(); updateBadges();
   buildNIList();
@@ -725,8 +825,12 @@ function buildDash(){
     const pct=pl/dep;
     const tr=trend(inv.id);
     const trCls=tr==='▲'?'pos':tr==='▼'?'neg':'';
+    const sd=inv.startDate||'—';
+    const daysHeld=inv.startDate?Math.floor((new Date()-new Date(inv.startDate))/(1000*60*60*24)):null;
     return `<tr>
       <td><div class="inv-name">${inv.name}</div><div class="inv-meta"><span class="badge badge-${inv.cur.toLowerCase()}">${inv.cur}</span> ${inv.platform} · ${inv.sector}</div></td>
+      <td class="muted" style="white-space:nowrap">${sd}</td>
+      <td class="muted">${daysHeld!==null?daysHeld+'d':'—'}</td>
       <td class="muted">${fmt2(dep)}</td>
       <td>${fmt2(val)}</td>
       <td class="${colorClass(pl)}">${pl>=0?'+':''}${fmt2(pl)}</td>
@@ -1439,235 +1543,368 @@ function handleCSVImport(e){
 }
 
 
-// ══════════════════════════════════════════════════════════ GOOGLE DRIVE SYNC
-const DRIVE_FILE_NAME = 'portfolio_data.json';
-let driveState = {
-  clientId: localStorage.getItem('_drive_client_id') || '',
-  apiKey:   localStorage.getItem('_drive_api_key')   || '',
-  fileId:   localStorage.getItem('_drive_file_id')   || '',
-  token:    '',
-  connected: false,
-};
-let driveSaveTimer = null;
+// ══════════════════════════════════════════════════ TRENDS & ALERTS
 
-function setSyncPill(state, label) {
-  const pill = document.getElementById('sync-pill');
-  if (!pill) return;
-  pill.className = 'sync-pill ' + state;
-  pill.textContent = label;
+let savedAlerts = JSON.parse(localStorage.getItem('_alerts')||'[]');
+
+function saveAlerts(){ try{localStorage.setItem('_alerts',JSON.stringify(savedAlerts));}catch(e){} }
+
+function populateAlertSelect(){
+  const sel=document.getElementById('alert-inv');
+  if(!sel)return;
+  sel.innerHTML='<option value="">choose</option>';
+  BASE.forEach(inv=>{
+    const o=document.createElement('option');
+    o.value=inv.id; o.textContent=inv.name+' ('+inv.cur+')';
+    sel.appendChild(o);
+  });
 }
 
-function openDriveModal() {
-  const el = document.getElementById('drive-modal');
-  if (el) {
-    el.classList.add('open');
-    const ci = document.getElementById('drive-client-id');
-    const ak = document.getElementById('drive-api-key');
-    if (ci) ci.value = driveState.clientId;
-    if (ak) ak.value = driveState.apiKey;
-  }
-}
-function closeDriveModal() {
-  const el = document.getElementById('drive-modal');
-  if (el) el.classList.remove('open');
-}
-
-function initDrive() {
-  const clientId = (document.getElementById('drive-client-id').value || '').trim();
-  const apiKey   = (document.getElementById('drive-api-key').value   || '').trim();
-  if (!clientId || !apiKey) { showToast('Enter both Client ID and API Key', true); return; }
-  driveState.clientId = clientId;
-  driveState.apiKey   = apiKey;
-  try {
-    localStorage.setItem('_drive_client_id', clientId);
-    localStorage.setItem('_drive_api_key', apiKey);
-  } catch(e) {}
-  closeDriveModal();
-  driveSignIn();
+function saveAlert(){
+  const id=document.getElementById('alert-inv').value;
+  const type=document.getElementById('alert-type').value;
+  const val=parseFloat(document.getElementById('alert-threshold').value);
+  if(!id){showToast('Choose an investment',true);return;}
+  if(isNaN(val)||val<=0){showToast('Enter a valid threshold',true);return;}
+  const inv=BASE.find(i=>i.id===id);
+  savedAlerts.push({id,name:inv.name,cur:inv.cur,type,threshold:val,createdAt:today()});
+  saveAlerts();
+  buildTrends();
+  document.getElementById('alert-threshold').value='';
+  showToast('✓ Alert saved');
 }
 
-function driveAutoConnect() {
-  if (driveState.clientId && driveState.apiKey) {
-    driveSignIn(true); // silent=true, don't prompt if not already signed in
-  }
+function deleteAlert(i){
+  savedAlerts.splice(i,1);
+  saveAlerts();
+  buildTrends();
 }
 
-function driveSignIn(silent) {
-  setSyncPill('syncing', '↻ Connecting...');
-  // Load the GAPI client library
-  if (typeof google === 'undefined' || !google.accounts) {
-    // GSI not loaded yet, retry shortly
-    setTimeout(() => driveSignIn(silent), 1500);
+function buildTrends(){
+  populateAlertSelect();
+  buildAlertList();
+  buildAlertsFired();
+  buildMomentum();
+  buildSignals();
+  buildCAGR();
+}
+
+// ── Alert list (saved alerts) ─────────────────────────────────
+function buildAlertList(){
+  const el=document.getElementById('alert-list');
+  if(!el)return;
+  if(!savedAlerts.length){
+    el.innerHTML='<p style="color:var(--muted);font-size:12px">No alerts set yet.</p>';
     return;
   }
-  // Use Google Identity Services token client
-  const tokenClient = google.accounts.oauth2.initTokenClient({
-    client_id: driveState.clientId,
-    scope: 'https://www.googleapis.com/auth/drive.file',
-    callback: (resp) => {
-      if (resp.error) {
-        setSyncPill('error', '☁ Auth failed');
-        if (!silent) showToast('Google auth failed: ' + resp.error, true);
-        return;
-      }
-      driveState.token = resp.access_token;
-      driveState.connected = true;
-      const btn = document.getElementById('drive-btn');
-      if (btn) { btn.textContent = '✓ Drive connected'; btn.style.color = 'var(--green)'; btn.style.borderColor = 'rgba(46,204,143,0.3)'; }
-      const fpBtn = document.getElementById('force-push-btn');
-      if (fpBtn) fpBtn.style.display = 'inline-flex';
-      showToast('☁ Google Drive connected — loading your data...');
+  const typeLabels={above:'value ↑ above',below:'value ↓ below',
+    return_above:'return ↑ above',return_below:'return ↓ below',loss_pct:'loss > '};
+  el.innerHTML=savedAlerts.map((a,i)=>`
+    <div class="alert-row">
+      <span style="font-weight:600">${a.name}</span>
+      <span style="color:var(--muted);font-family:'DM Mono',monospace;font-size:11px">${typeLabels[a.type]||a.type} ${a.threshold}${a.type.includes('pct')||a.type.includes('return')?'%':' '+a.cur}</span>
+      <span style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted2)">set ${a.createdAt}</span>
+      <button class="btn btn-ghost" style="padding:3px 7px" onclick="deleteAlert(${i})">✕</button>
+    </div>`).join('');
+}
+
+// ── Check which alerts have fired ────────────────────────────
+function buildAlertsFired(){
+  const el=document.getElementById('alerts-fired');
+  if(!el)return;
+  const fired=[];
+  savedAlerts.forEach(a=>{
+    const inv=BASE.find(i=>i.id===a.id);
+    if(!inv)return;
+    const val=getLastVal(a.id);
+    const dep=getTotalDeposited(a.id);
+    const pl=val-dep;
+    const pctReturn=(pl/dep)*100;
+    let triggered=false, msg='', cls='';
+    if(a.type==='above'&&val>a.threshold){
+      triggered=true; msg=`📈 ${a.name} value is ${fmt2(val)} ${a.cur} — above your alert of ${a.threshold}`; cls='success';
+    } else if(a.type==='below'&&val<a.threshold){
+      triggered=true; msg=`📉 ${a.name} value is ${fmt2(val)} ${a.cur} — below your alert of ${a.threshold}`; cls='danger';
+    } else if(a.type==='return_above'&&pctReturn>a.threshold){
+      triggered=true; msg=`🎯 ${a.name} return is ${pctReturn.toFixed(1)}% — above your ${a.threshold}% target`; cls='success';
+    } else if(a.type==='return_below'&&pctReturn<a.threshold){
+      triggered=true; msg=`⚠ ${a.name} return is ${pctReturn.toFixed(1)}% — below your ${a.threshold}% threshold`; cls='danger';
+    } else if(a.type==='loss_pct'&&pctReturn<-Math.abs(a.threshold)){
+      triggered=true; msg=`🚨 ${a.name} is down ${Math.abs(pctReturn).toFixed(1)}% — loss exceeds your ${a.threshold}% limit`; cls='danger';
+    }
+    if(triggered) fired.push({msg,cls});
+  });
+  if(!fired.length){
+    el.innerHTML='<p style="color:var(--muted);font-size:12px">No alerts triggered right now.</p>';
+    return;
+  }
+  el.innerHTML=fired.map(f=>`<div class="alert-fired ${f.cls}">${f.msg}</div>`).join('');
+}
+
+// ── Momentum signals ──────────────────────────────────────────
+function buildMomentum(){
+  const el=document.getElementById('momentum-grid');
+  if(!el)return;
+  el.innerHTML=BASE.map(inv=>{
+    const series=valEntries.filter(e=>e.values&&e.values[inv.id]!=null).map(e=>e.values[inv.id]).slice(-4);
+    if(series.length<2){
+      return `<div class="momentum-card">
+        <div><div class="inv-name">${inv.name}</div><div class="inv-meta" style="margin-top:2px">Not enough data yet — need 2+ weekly entries</div></div>
+        <span style="color:var(--muted);font-size:20px">—</span>
+      </div>`;
+    }
+    const first=series[0], last=series[series.length-1];
+    const change=last-first;
+    const pct=(change/first)*100;
+    const isUp=change>=0;
+    // Count how many consecutive weeks it moved in the same direction
+    let streak=1;
+    for(let i=series.length-1;i>0;i--){
+      if((series[i]>series[i-1])===isUp) streak++; else break;
+    }
+    const barW=Math.min(Math.abs(pct)*3,100);
+    const arrow=isUp?'▲':'▼';
+    const col=isUp?'var(--green)':'var(--red)';
+    return `<div class="momentum-card">
+      <div style="flex:1">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div class="inv-name">${inv.name} <span class="badge badge-${inv.cur.toLowerCase()}" style="margin-left:4px">${inv.cur}</span></div>
+          <span style="font-family:'DM Mono',monospace;font-size:12px;font-weight:700;color:${col}">${arrow} ${pct>=0?'+':''}${pct.toFixed(1)}%</span>
+        </div>
+        <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);margin-top:3px">${fmt2(first)} → ${fmt2(last)} over ${series.length} entries · ${streak} week streak ${isUp?'↑':'↓'}</div>
+        <div class="momentum-bar-wrap"><div class="momentum-bar-fill" style="width:${barW}%;background:${col}"></div></div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ── Buy / Hold / Review signals ───────────────────────────────
+function buildSignals(){
+  const el=document.getElementById('signals-grid');
+  if(!el)return;
+  el.innerHTML=BASE.map(inv=>{
+    const val=getLastVal(inv.id);
+    const dep=getTotalDeposited(inv.id);
+    const pl=val-dep;
+    const pct=(pl/dep)*100;
+    const series=valEntries.filter(e=>e.values&&e.values[inv.id]!=null).map(e=>e.values[inv.id]).slice(-4);
+    const momentum=series.length>=2?((series[series.length-1]-series[0])/series[0])*100:null;
+    const daysHeld=inv.startDate?Math.floor((new Date()-new Date(inv.startDate))/(1000*60*60*24)):null;
+
+    // Signal logic
+    let signal='hold', reason='', detail='';
+
+    if(pct<=-15){
+      signal='review';
+      reason='Significant loss';
+      detail=`Down ${Math.abs(pct).toFixed(1)}% from your entry price. Consider whether the reason you bought still holds.`;
+    } else if(pct>30&&momentum!==null&&momentum>5){
+      signal='watch';
+      reason='Strong gains — consider taking some profit';
+      detail=`Up ${pct.toFixed(1)}% overall, with ${momentum.toFixed(1)}% momentum. Could be a good time to lock in partial gains.`;
+    } else if(pct<0&&momentum!==null&&momentum>0){
+      signal='watch';
+      reason='Recovering from loss';
+      detail=`Still down ${Math.abs(pct).toFixed(1)}% overall but recent trend is positive (+${momentum.toFixed(1)}%). Watch closely.`;
+    } else if(pct>0&&momentum!==null&&momentum>3){
+      signal='buy';
+      reason='Positive momentum + in profit';
+      detail=`Up ${pct.toFixed(1)}% overall, gaining ${momentum.toFixed(1)}% recently. May be worth adding to this position.`;
+    } else if(momentum!==null&&momentum<-5){
+      signal='review';
+      reason='Declining momentum';
+      detail=`Dropped ${Math.abs(momentum).toFixed(1)}% across recent entries. Review whether this is temporary or a trend.`;
+    } else {
+      signal='hold';
+      reason='Stable — no strong signal';
+      detail=`${pct>=0?'Up':'Down'} ${Math.abs(pct).toFixed(1)}% overall. No strong buy or sell signal right now.`;
+    }
+
+    const daysStr=daysHeld?`Held ${daysHeld} days`:'';
+    return `<div class="signal-card">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:.5rem">
+        <div>
+          <span class="signal-badge ${signal}">${signal==='buy'?'▲ ADD MORE':signal==='review'?'⚠ REVIEW':signal==='watch'?'👁 WATCH':'─ HOLD'}</span>
+          <div class="inv-name" style="margin-top:4px">${inv.name}</div>
+          <div class="inv-meta">${daysStr} · ${pct>=0?'+':''}${pct.toFixed(1)}% total return</div>
+        </div>
+        <div style="text-align:right;font-family:'DM Mono',monospace;font-size:12px">
+          <div>${fmt2(dep)} ${inv.cur} in</div>
+          <div style="font-weight:600;color:${pl>=0?'var(--green)':'var(--red)'}">${pl>=0?'+':''}${fmt2(pl)} ${inv.cur}</div>
+        </div>
+      </div>
+      <div style="font-size:12px;font-weight:600;margin-bottom:3px">${reason}</div>
+      <div style="font-size:12px;color:var(--muted);line-height:1.6">${detail}</div>
+    </div>`;
+  }).join('');
+}
+
+// ── Annualised return (CAGR) ──────────────────────────────────
+function buildCAGR(){
+  const el=document.getElementById('cagr-grid');
+  if(!el)return;
+  const rows=BASE.map(inv=>{
+    const val=getLastVal(inv.id);
+    const dep=getTotalDeposited(inv.id);
+    const pl=val-dep;
+    const pctTotal=(pl/dep)*100;
+    const daysHeld=inv.startDate?Math.floor((new Date()-new Date(inv.startDate))/(1000*60*60*24)):null;
+    let cagr=null;
+    if(daysHeld&&daysHeld>0&&dep>0){
+      const years=daysHeld/365;
+      cagr=(Math.pow(val/dep,1/years)-1)*100;
+    }
+    return {inv,dep,val,pl,pctTotal,daysHeld,cagr};
+  }).sort((a,b)=>(b.cagr||0)-(a.cagr||0));
+
+  el.innerHTML=`<div class="cagr-hdr">
+    <span>Investment</span>
+    <span style="text-align:right">Days held</span>
+    <span style="text-align:right">Total return</span>
+    <span style="text-align:right">Ann. return</span>
+    <span style="text-align:right">P&amp;L</span>
+  </div>`+rows.map(r=>{
+    const cagrStr=r.cagr!==null?(r.cagr>=0?'+':'')+r.cagr.toFixed(1)+'%/yr':'—';
+    return `<div class="cagr-row">
+      <div><div class="inv-name" style="font-size:12px">${r.inv.name}</div>
+        <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted)">${r.inv.platform} · ${r.inv.cur}</div></div>
+      <span style="font-family:'DM Mono',monospace;text-align:right;color:var(--muted)">${r.daysHeld?r.daysHeld+'d':'—'}</span>
+      <span style="font-family:'DM Mono',monospace;text-align:right" class="${r.pctTotal>=0?'pos':'neg'}">${r.pctTotal>=0?'+':''}${r.pctTotal.toFixed(1)}%</span>
+      <span style="font-family:'DM Mono',monospace;font-weight:700;text-align:right" class="${r.cagr!==null&&r.cagr>=0?'pos':'neg'}">${cagrStr}</span>
+      <span style="font-family:'DM Mono',monospace;text-align:right" class="${r.pl>=0?'pos':'neg'}">${r.pl>=0?'+':''}${fmt2(r.pl)}</span>
+    </div>`;
+  }).join('');
+}
+
+
+
+// ══════════════════════════════════════════════════ GOOGLE DRIVE SYNC
+const DRIVE_FILE_NAME='portfolio_data.json';
+let driveState={
+  clientId:localStorage.getItem('_drive_client_id')||'',
+  apiKey:localStorage.getItem('_drive_api_key')||'',
+  fileId:localStorage.getItem('_drive_file_id')||'',
+  token:'',connected:false,
+};
+let driveSaveTimer=null;
+
+function setSyncPill(state,label){
+  const pill=document.getElementById('sync-pill');
+  if(!pill)return;
+  pill.className='sync-pill '+state;
+  pill.innerHTML=label;
+}
+function openDriveModal(){
+  const el=document.getElementById('drive-modal');
+  if(!el)return;
+  el.classList.add('open');
+  const ci=document.getElementById('drive-client-id');
+  const ak=document.getElementById('drive-api-key');
+  if(ci)ci.value=driveState.clientId;
+  if(ak)ak.value=driveState.apiKey;
+  if(driveState.connected){const fp=document.getElementById('force-push-btn');if(fp)fp.style.display='inline-flex';}
+}
+function closeDriveModal(){
+  const el=document.getElementById('drive-modal');
+  if(el)el.classList.remove('open');
+}
+document.addEventListener('click',function(e){
+  const modal=document.getElementById('drive-modal');
+  if(modal&&e.target===modal)closeDriveModal();
+});
+function initDrive(){
+  const clientId=(document.getElementById('drive-client-id').value||'').trim();
+  const apiKey=(document.getElementById('drive-api-key').value||'').trim();
+  if(!clientId||!apiKey){showToast('Enter both Client ID and API Key',true);return;}
+  driveState.clientId=clientId; driveState.apiKey=apiKey;
+  try{localStorage.setItem('_drive_client_id',clientId);localStorage.setItem('_drive_api_key',apiKey);}catch(e){}
+  closeDriveModal();
+  driveSignIn(false);
+}
+function driveAutoConnect(){
+  if(driveState.clientId&&driveState.apiKey) driveSignIn(true);
+}
+function driveSignIn(silent){
+  setSyncPill('syncing','<span class="spin">↻</span> Connecting...');
+  if(typeof google==='undefined'||!google.accounts){setTimeout(()=>driveSignIn(silent),1500);return;}
+  const tokenClient=google.accounts.oauth2.initTokenClient({
+    client_id:driveState.clientId,
+    scope:'https://www.googleapis.com/auth/drive.file',
+    callback:(resp)=>{
+      if(resp.error){setSyncPill('error','☁ Auth failed');if(!silent)showToast('Auth failed: '+resp.error,true);return;}
+      driveState.token=resp.access_token; driveState.connected=true;
+      const btn=document.getElementById('drive-btn');
+      if(btn){btn.textContent='✓ Drive connected';btn.style.color='var(--green)';btn.style.borderColor='rgba(46,204,143,0.3)';}
+      const fp=document.getElementById('force-push-btn'); if(fp)fp.style.display='inline-flex';
+      showToast('☁ Google Drive connected — syncing...');
       driveLoadOrCreate();
     },
   });
-  if (silent) {
-    tokenClient.requestAccessToken({ prompt: 'none' });
-  } else {
-    tokenClient.requestAccessToken({ prompt: 'consent' });
-  }
+  tokenClient.requestAccessToken({prompt:silent?'none':'consent'});
 }
-
-async function driveLoadOrCreate() {
-  setSyncPill('syncing', '<span class="spin">↻</span> Syncing...');
-  try {
-    // Search for existing file
-    let fileId = driveState.fileId;
-    if (!fileId) {
-      const search = await driveGET(
-        `https://www.googleapis.com/drive/v3/files?q=name='${DRIVE_FILE_NAME}' and trashed=false&fields=files(id,name,modifiedTime)&spaces=drive`
-      );
-      const files = search.files || [];
-      if (files.length > 0) {
-        fileId = files[0].id;
-        driveState.fileId = fileId;
-        try { localStorage.setItem('_drive_file_id', fileId); } catch(e) {}
-      }
+async function driveLoadOrCreate(){
+  setSyncPill('syncing','<span class="spin">↻</span> Syncing...');
+  try{
+    let fileId=driveState.fileId;
+    if(!fileId){
+      const search=await driveGET(`https://www.googleapis.com/drive/v3/files?q=name='${DRIVE_FILE_NAME}' and trashed=false&fields=files(id,name,modifiedTime)&spaces=drive`);
+      const files=search.files||[];
+      if(files.length>0){fileId=files[0].id;driveState.fileId=fileId;try{localStorage.setItem('_drive_file_id',fileId);}catch(e){}}
     }
-    if (fileId) {
-      // Load existing data from Drive — Drive always wins (it is the source of truth)
-      const data = await driveGET(`https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`);
-      if (data && (data.valEntries || data.depEntries)) {
-        // Use whichever has MORE entries (handles first-time upload from local)
-        if (data.valEntries) {
-          valEntries = data.valEntries.length >= valEntries.length
-            ? data.valEntries
-            : valEntries; // local has more (not yet pushed) — we'll push below
-        }
-        if (data.depEntries) {
-          depEntries = data.depEntries.length >= depEntries.length
-            ? data.depEntries
-            : depEntries;
-        }
-        try {
-          localStorage.setItem('v2_val', JSON.stringify(valEntries));
-          localStorage.setItem('v2_dep', JSON.stringify(depEntries));
-        } catch(e) {}
-        buildKPIs(); buildDash(); buildValTable(); buildHistory();
-        buildGoalProgress(); buildGoalProgressGHS(); updateBadges();
-        setSyncPill('synced', '☁ Synced');
+    if(fileId){
+      const data=await driveGET(`https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`);
+      if(data&&(data.valEntries||data.depEntries)){
+        const driveVal=data.valEntries||[]; const driveDep=data.depEntries||[];
+        if(driveVal.length>=valEntries.length) valEntries=driveVal;
+        if(driveDep.length>=depEntries.length) depEntries=driveDep;
+        try{localStorage.setItem('v2_val',JSON.stringify(valEntries));localStorage.setItem('v2_dep',JSON.stringify(depEntries));}catch(e){}
+        buildKPIs();buildDash();buildValTable();buildHistory();
+        buildGoalProgress();buildGoalProgressGHS();updateBadges();
+        setSyncPill('synced','☁ Synced');
         showToast('☁ Data loaded from Google Drive');
-        // If local had more entries, push them up to Drive now
-        if ((data.valEntries && valEntries.length > data.valEntries.length) ||
-            (data.depEntries && depEntries.length > data.depEntries.length)) {
-          await driveSaveNow();
-        }
-      } else {
-        // File exists but empty — push local data up
-        await driveSaveNow();
-      }
-    } else {
-      // No file yet — upload all local data to Drive now
-      await driveSaveNow();
-    }
-  } catch(err) {
-    setSyncPill('error', '☁ Sync error');
-    console.error('Drive load error:', err);
-    showToast('Drive sync issue — working locally', true);
-  }
+        if(valEntries.length>driveVal.length||depEntries.length>driveDep.length) await driveSaveNow();
+      } else { await driveSaveNow(); }
+    } else { await driveSaveNow(); }
+  }catch(err){setSyncPill('error','☁ Sync error');console.error('Drive load error:',err);showToast('Drive sync issue — saved locally',true);}
 }
-
-async function driveSaveNow() {
-  if (!driveState.connected || !driveState.token) return;
-  setSyncPill('syncing', '<span class="spin">↻</span> Saving...');
-  const payload = JSON.stringify({
-    valEntries,
-    depEntries,
-    savedAt: new Date().toISOString(),
-    version: 1,
-  });
-  try {
-    const metadata = { name: DRIVE_FILE_NAME, mimeType: 'application/json' };
-    const boundary = 'drive_boundary_xyz';
-    const body = [
-      '--' + boundary,
-      'Content-Type: application/json; charset=UTF-8',
-      '',
-      JSON.stringify(metadata),
-      '--' + boundary,
-      'Content-Type: application/json',
-      '',
-      payload,
-      '--' + boundary + '--',
-    ].join('\r\n');
-
-    let url, method;
-    if (driveState.fileId) {
-      url = `https://www.googleapis.com/upload/drive/v3/files/${driveState.fileId}?uploadType=multipart`;
-      method = 'PATCH';
-    } else {
-      url = 'https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart';
-      method = 'POST';
-    }
-    const resp = await fetch(url, {
-      method,
-      headers: {
-        'Authorization': 'Bearer ' + driveState.token,
-        'Content-Type': 'multipart/related; boundary=' + boundary,
-      },
-      body,
-    });
-    const result = await resp.json();
-    if (result.id) {
-      if (!driveState.fileId) {
-        driveState.fileId = result.id;
-        try { localStorage.setItem('_drive_file_id', result.id); } catch(e) {}
-      }
-      setSyncPill('synced', '☁ Synced ' + new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}));
-    } else {
-      throw new Error(result.error?.message || 'Unknown Drive error');
-    }
-  } catch(err) {
-    setSyncPill('error', '☁ Save failed');
-    console.error('Drive save error:', err);
-  }
+async function driveSaveNow(){
+  if(!driveState.connected||!driveState.token)return;
+  setSyncPill('syncing','<span class="spin">↻</span> Saving...');
+  const payload=JSON.stringify({valEntries,depEntries,savedAt:new Date().toISOString(),version:2});
+  const boundary='portfolio_boundary_xyz';
+  const body=[
+    '--'+boundary,
+    'Content-Type: application/json; charset=UTF-8',
+    '',
+    JSON.stringify({name:DRIVE_FILE_NAME,mimeType:'application/json'}),
+    '--'+boundary,
+    'Content-Type: application/json',
+    '',
+    payload,
+    '--'+boundary+'--',
+  ].join('\r\n');
+  try{
+    const url=driveState.fileId?`https://www.googleapis.com/upload/drive/v3/files/${driveState.fileId}?uploadType=multipart`:'https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart';
+    const method=driveState.fileId?'PATCH':'POST';
+    const resp=await fetch(url,{method,headers:{'Authorization':'Bearer '+driveState.token,'Content-Type':'multipart/related; boundary='+boundary},body});
+    const result=await resp.json();
+    if(result.id){
+      if(!driveState.fileId){driveState.fileId=result.id;try{localStorage.setItem('_drive_file_id',result.id);}catch(e){}}
+      setSyncPill('synced','☁ Synced '+new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}));
+    } else { throw new Error(result.error?.message||'Drive save error'); }
+  }catch(err){setSyncPill('error','☁ Save failed');console.error('Drive save:',err);}
 }
-
-function driveDebouncedSave() {
-  clearTimeout(driveSaveTimer);
-  driveSaveTimer = setTimeout(driveSaveNow, 2000); // save 2s after last change
-}
-
-async function forcePushToDrive() {
-  if (!driveState.connected || !driveState.token) {
-    showToast('Connect Google Drive first', true);
-    return;
-  }
-  showToast('Uploading all data to Drive...');
+function driveDebouncedSave(){clearTimeout(driveSaveTimer);driveSaveTimer=setTimeout(driveSaveNow,2000);}
+async function forcePushToDrive(){
+  if(!driveState.connected||!driveState.token){showToast('Connect Google Drive first',true);return;}
+  showToast('Uploading all data to Google Drive...');
   await driveSaveNow();
-  showToast('✓ All data uploaded to Google Drive');
+  showToast('✓ All data pushed to Google Drive');
 }
-
-async function driveGET(url) {
-  const resp = await fetch(url, {
-    headers: { 'Authorization': 'Bearer ' + driveState.token }
-  });
+async function driveGET(url){
+  const resp=await fetch(url,{headers:{'Authorization':'Bearer '+driveState.token}});
   return resp.json();
 }
-
-// Close modal on overlay click
-document.getElementById('drive-modal')?.addEventListener('click', function(e) {
-  if (e.target === this) closeDriveModal();
-});
 
 
 // Make Array.findLastIndex work in older browsers
