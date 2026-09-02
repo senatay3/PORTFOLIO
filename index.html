@@ -67,8 +67,9 @@ body{background:var(--navy);color:var(--white);font-family:'Syne',sans-serif;dis
   border:1px solid transparent;transition:all .15s;
   user-select:none;
 }
-.sb-item:hover{background:var(--card2);color:var(--white)}
-.sb-item.active{background:var(--navy4);color:var(--white);border-color:var(--border2)}
+.sb-item{transition:all .2s cubic-bezier(.16,1,.3,1)}
+.sb-item:hover{background:var(--card2);color:var(--white);transform:translateX(2px)}
+.sb-item.active{background:var(--navy4);color:var(--white);border-color:var(--border2);box-shadow:0 0 0 1px rgba(0,212,170,0.15) inset}
 .sb-item .sb-icon{font-size:15px;width:18px;text-align:center;flex-shrink:0}
 .sb-item .sb-badge{margin-left:auto;background:var(--teal);color:var(--navy);font-family:'DM Mono',monospace;font-size:9px;font-weight:700;padding:1px 6px;border-radius:10px;min-width:18px;text-align:center}
 .sb-item .sb-badge.amber{background:var(--amber)}
@@ -105,7 +106,7 @@ body{background:var(--navy);color:var(--white);font-family:'Syne',sans-serif;dis
 .content{padding:1.5rem 1.8rem;flex:1}
 
 /* ── PAGE VISIBILITY ─────────────────────────── */
-.page{display:none}.page.active{display:block}
+.page{display:none}.page.active{display:block;animation:fadeSlideUp .35s cubic-bezier(.16,1,.3,1)}
 
 /* ── KPI STRIP ────────────────────────────────── */
 .kpi-strip{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:1.5rem}
@@ -274,6 +275,76 @@ input::placeholder{color:var(--muted2)}
   .cagr-row{display:grid;grid-template-columns:1fr 80px 90px 90px 80px;gap:8px;align-items:center;padding:9px 0;border-bottom:1px solid var(--border);font-size:12px}
   .cagr-row:last-child{border-bottom:none}
   .cagr-hdr{font-family:'DM Mono',monospace;font-size:9px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);padding:0 0 6px;border-bottom:1px solid var(--border);display:grid;grid-template-columns:1fr 80px 90px 90px 80px;gap:8px;margin-bottom:4px}
+  /* ── ANIMATIONS ── */
+  @keyframes fadeSlideUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+  @keyframes fadeIn{from{opacity:0}to{opacity:1}}
+  @keyframes scaleIn{from{opacity:0;transform:scale(.92)}to{opacity:1;transform:scale(1)}}
+  @keyframes shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
+  @keyframes pulseGlow{0%,100%{box-shadow:0 0 0 0 rgba(0,212,170,0.25)}50%{box-shadow:0 0 0 6px rgba(0,212,170,0)}}
+  @keyframes drawLine{from{stroke-dashoffset:1000}to{stroke-dashoffset:0}}
+  @keyframes countUp{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+  @keyframes floatSlow{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+  .anim-card{animation:fadeSlideUp .5s cubic-bezier(.16,1,.3,1) backwards}
+  .anim-card:nth-child(1){animation-delay:.02s}
+  .anim-card:nth-child(2){animation-delay:.08s}
+  .anim-card:nth-child(3){animation-delay:.14s}
+  .anim-card:nth-child(4){animation-delay:.20s}
+  .anim-card:nth-child(5){animation-delay:.26s}
+  .kpi{transition:transform .25s cubic-bezier(.16,1,.3,1),box-shadow .25s}
+  .kpi:hover{transform:translateY(-3px);box-shadow:0 10px 28px -8px rgba(0,0,0,0.45)}
+  .kpi-val{animation:countUp .4s ease-out backwards;animation-delay:.15s}
+  .card{transition:box-shadow .3s}
+  .card:hover{box-shadow:0 8px 24px -10px rgba(0,0,0,0.35)}
+
+  /* ── CHART GRID ── */
+  .chart-row{display:grid;grid-template-columns:280px 1fr;gap:14px;margin-bottom:1.1rem}
+  @media(max-width:900px){.chart-row{grid-template-columns:1fr}}
+
+  /* ── DONUT CHART ── */
+  .donut-wrap{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:.5rem 0}
+  .donut-center-label{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+  .donut-center-val{font-size:1.3rem;font-weight:700;letter-spacing:-.02em}
+  .donut-legend{display:flex;flex-direction:column;gap:6px;margin-top:1rem;width:100%}
+  .donut-legend-item{display:flex;align-items:center;gap:8px;font-size:12px}
+  .donut-legend-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+  .donut-legend-label{flex:1;color:var(--muted)}
+  .donut-legend-val{font-family:'DM Mono',monospace;font-weight:600}
+  .donut-seg{transition:opacity .2s;cursor:pointer}
+  .donut-seg:hover{opacity:.75}
+
+  /* ── BAR CHART (P&L comparison) ── */
+  .barchart-wrap{display:flex;flex-direction:column;gap:9px;padding:.3rem 0}
+  .barchart-row{display:grid;grid-template-columns:110px 1fr 70px;gap:10px;align-items:center}
+  .barchart-label{font-size:11px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .barchart-track{position:relative;height:20px;background:var(--navy3);border-radius:5px;overflow:hidden}
+  .barchart-fill{position:absolute;top:0;bottom:0;border-radius:5px;transition:width 1s cubic-bezier(.16,1,.3,1);width:0}
+  .barchart-fill.pos{left:50%;background:linear-gradient(90deg,var(--teal),var(--green))}
+  .barchart-fill.neg{right:50%;background:linear-gradient(90deg,var(--red),#ff8080)}
+  .barchart-zero{position:absolute;left:50%;top:0;bottom:0;width:1px;background:var(--border2)}
+  .barchart-val{font-family:'DM Mono',monospace;font-size:11px;font-weight:600;text-align:right}
+
+  /* ── GOAL RING ── */
+  .goal-ring-wrap{display:flex;align-items:center;gap:1.3rem;flex-wrap:wrap}
+  .goal-ring-svg circle{transition:stroke-dashoffset 1.2s cubic-bezier(.16,1,.3,1)}
+  .goal-ring-center{font-size:1.1rem;font-weight:800}
+
+  /* ── AREA CHART (growth over time) ── */
+  .area-chart-svg path.line{stroke-dasharray:1000;stroke-dashoffset:1000;animation:drawLine 1.4s cubic-bezier(.16,1,.3,1) forwards}
+  .area-chart-svg path.fill-area{opacity:0;animation:fadeIn .8s ease-out .6s forwards}
+  .area-chart-svg circle.dot{opacity:0;animation:scaleIn .3s ease-out forwards}
+
+  /* ── PROGRESS BAR IN TABLE (mini) ── */
+  .pct-mini-bar{height:3px;border-radius:2px;background:var(--navy3);overflow:hidden;margin-top:3px;width:60px}
+  .pct-mini-fill{height:100%;border-radius:2px;transition:width .8s cubic-bezier(.16,1,.3,1);width:0}
+
+  /* ── LOADING SHIMMER ── */
+  .shimmer{background:linear-gradient(90deg,var(--card) 25%,var(--card2) 50%,var(--card) 75%);background-size:200% 100%;animation:shimmer 1.5s infinite}
+
+  /* ── SECTOR PILLS ── */
+  .sector-pill-row{display:flex;flex-wrap:wrap;gap:6px;margin-top:.8rem}
+  .sector-pill{font-family:'DM Mono',monospace;font-size:10px;padding:4px 10px;border-radius:20px;background:var(--navy3);color:var(--muted);transition:all .2s;cursor:default}
+  .sector-pill:hover{background:var(--navy4);color:var(--white)}
+
 @media(max-width:700px){
   .sidebar{display:none}
   .kpi-strip{grid-template-columns:repeat(2,1fr)}
@@ -331,6 +402,7 @@ input::placeholder{color:var(--muted2)}
   <div class="sb-bottom">
     <button class="sb-load" onclick="openDriveModal()" id="drive-btn" style="margin-bottom:6px;background:var(--blue2);border-color:rgba(77,166,255,0.25);color:var(--blue)">☁ Connect Google Drive</button>
     <button class="sb-load" onclick="forcePushToDrive()" style="margin-bottom:6px;background:var(--green2);border-color:rgba(46,204,143,0.25);color:var(--green)">↑ Push data to Drive</button>
+    <button class="sb-load" onclick="resetAndResync()" style="margin-bottom:6px;background:var(--red2);border-color:rgba(255,92,92,0.25);color:var(--red)">⟲ Reset to correct figures</button>
     <button class="sb-export" onclick="exportExcel()">↓ Download Excel</button>
     <button class="sb-load" onclick="exportPDF()" style="margin-top:6px">▤ Download PDF summary</button>
     <button class="sb-load" onclick="document.getElementById('file-input').click()" style="margin-top:6px">↑ Load Excel file</button>
@@ -358,7 +430,24 @@ input::placeholder{color:var(--muted2)}
     <!-- ── DASHBOARD ──────────────────────────── -->
     <div class="page active" id="page-dashboard">
       <div class="kpi-strip" id="kpi-strip"></div>
-      <div class="card">
+
+      <div class="chart-row">
+        <div class="card anim-card" style="margin-bottom:0">
+          <div class="card-title">Portfolio allocation</div>
+          <div class="donut-wrap" id="donut-chart"></div>
+        </div>
+        <div class="card anim-card" style="margin-bottom:0">
+          <div class="card-title">P&amp;L by investment</div>
+          <div class="barchart-wrap" id="barchart"></div>
+        </div>
+      </div>
+
+      <div class="card anim-card">
+        <div class="card-title">Portfolio growth over time</div>
+        <div id="growth-chart"></div>
+      </div>
+
+      <div class="card anim-card">
         <div class="card-title">All investments — current snapshot</div>
         <table class="tbl">
           <thead><tr>
@@ -373,7 +462,7 @@ input::placeholder{color:var(--muted2)}
     <!-- ── PERFORMANCE ────────────────────────── -->
     <div class="page" id="page-performance">
       <div class="alert alert-info">ℹ Rankings based on % return vs total deposited. EUR and GHS shown separately.</div>
-      <div class="card">
+      <div class="card anim-card">
         <div class="card-title">Portfolio goals</div>
         <div style="display:flex;gap:10px;align-items:end;margin-bottom:1rem;flex-wrap:wrap">
           <div class="fg"><span class="fl">Target net worth (€ equiv.)</span><input type="number" id="goal-target" placeholder="e.g. 1000" step="10" style="width:160px"></div>
@@ -386,11 +475,11 @@ input::placeholder{color:var(--muted2)}
         </div>
         <div id="goal-progress-ghs"></div>
       </div>
-      <div class="card">
+      <div class="card anim-card">
         <div class="card-title">EUR investments — Revolut</div>
         <div class="perf-grid" id="perf-eur"></div>
       </div>
-      <div class="card">
+      <div class="card anim-card">
         <div class="card-title">GHS investments — IC &amp; Plus</div>
         <div class="perf-grid" id="perf-ghs"></div>
       </div>
@@ -398,7 +487,7 @@ input::placeholder{color:var(--muted2)}
 
     <!-- ── WEEKLY ENTRY ───────────────────────── -->
     <div class="page" id="page-valuations">
-      <div class="card">
+      <div class="card anim-card">
         <div class="card-title">Sunday valuation entry</div>
         <div class="form-row">
           <div class="fg"><span class="fl">Date</span><input type="date" id="val-date"></div>
@@ -424,7 +513,7 @@ input::placeholder{color:var(--muted2)}
 
     <!-- ── DEPOSIT ────────────────────────────── -->
     <div class="page" id="page-deposits">
-      <div class="card">
+      <div class="card anim-card">
         <div class="card-title">Record a new deposit</div>
         <p style="font-size:12px;color:var(--muted);margin-bottom:1rem">Use this whenever you top up one of your investments. The total deposited amount updates automatically and affects all P&amp;L calculations.</p>
         <div class="form-row">
@@ -442,7 +531,7 @@ input::placeholder{color:var(--muted2)}
     <!-- ── NEW INVESTMENT ─────────────────── -->
     <div class="page" id="page-new-investment">
 
-      <div class="card">
+      <div class="card anim-card">
         <div class="card-title">Add a new investment</div>
         <p style="font-size:12px;color:var(--muted);margin-bottom:1.2rem">
           Use this when you start investing in something brand new — a stock, ETF, fund or any asset.
@@ -504,7 +593,7 @@ input::placeholder{color:var(--muted2)}
         <div id="ni-preview" style="display:none;padding:.75rem 1rem;background:rgba(0,212,170,0.07);border:1px solid rgba(0,212,170,0.2);border-radius:8px;font-family:'DM Mono',monospace;font-size:12px"></div>
       </div>
 
-      <div class="card">
+      <div class="card anim-card">
         <div class="card-title">Custom investments you have added</div>
         <div id="ni-list"><p style="color:var(--muted);font-size:13px">No custom investments added yet.</p></div>
       </div>
@@ -513,7 +602,7 @@ input::placeholder{color:var(--muted2)}
 
     <!-- ── TRENDS & ALERTS ──────────────────── -->
     <div class="page" id="page-trends">
-      <div class="card">
+      <div class="card anim-card">
         <div class="card-title">Alert settings</div>
         <p style="font-size:12px;color:var(--muted);margin-bottom:1rem">Set thresholds per investment. The app flags when any position crosses them. Analysis only — not financial advice.</p>
         <div style="display:flex;gap:10px;align-items:end;flex-wrap:wrap;margin-bottom:.5rem">
@@ -532,21 +621,21 @@ input::placeholder{color:var(--muted2)}
         </div>
         <div id="alert-list" style="margin-top:.8rem"></div>
       </div>
-      <div class="card">
+      <div class="card anim-card">
         <div class="card-title">🔔 Active alerts</div>
         <div id="alerts-fired"></div>
       </div>
-      <div class="card">
+      <div class="card anim-card">
         <div class="card-title">📈 Momentum signals</div>
         <p style="font-size:12px;color:var(--muted);margin-bottom:1rem">Direction and strength of each investment over your last 4 weekly entries.</p>
         <div id="momentum-grid"></div>
       </div>
-      <div class="card">
+      <div class="card anim-card">
         <div class="card-title">🎯 Buy / Hold / Review signals</div>
         <p style="font-size:12px;color:var(--muted);margin-bottom:1rem">Based on entry price, current value, days held and recent momentum. <strong style="color:var(--amber)">Always do your own research before acting.</strong></p>
         <div id="signals-grid"></div>
       </div>
-      <div class="card">
+      <div class="card anim-card">
         <div class="card-title">📊 Annualised return (CAGR) — fair comparison across all investments</div>
         <div id="cagr-grid"></div>
       </div>
@@ -554,7 +643,7 @@ input::placeholder{color:var(--muted2)}
 
     <!-- ── WEEK BY WEEK ───────────────────────── -->
     <div class="page" id="page-weekly-diff">
-      <div class="card">
+      <div class="card anim-card">
         <div class="card-title">Select a week to compare</div>
         <div class="week-selector" id="week-pills">
           <span class="week-pill-label">Week ending:</span>
@@ -565,7 +654,7 @@ input::placeholder{color:var(--muted2)}
 
     <!-- ── DEPOSIT LOG ────────────────────────── -->
     <div class="page" id="page-dep-history">
-      <div class="card">
+      <div class="card anim-card">
         <div class="card-title">All deposits logged</div>
         <input type="text" id="dep-search" placeholder="Search by investment" style="width:100%;margin-bottom:1rem" oninput="filterDeposits(this.value)">
         <div class="dep-hdr"><span>Date</span><span>Investment</span><span style="text-align:right">Amount</span><span>Cur</span><span style="text-align:right">Running total</span><span></span></div>
@@ -575,7 +664,7 @@ input::placeholder{color:var(--muted2)}
 
     <!-- ── FULL HISTORY ───────────────────────── -->
     <div class="page" id="page-history">
-      <div class="card">
+      <div class="card anim-card">
         <div class="card-title">Complete activity log</div>
         <input type="text" id="hist-search" placeholder="Search by investment or date (YYYY-MM-DD)" style="width:100%;margin-bottom:1rem" oninput="filterHistory(this.value)">
         <div id="hist-list"></div>
@@ -584,11 +673,11 @@ input::placeholder{color:var(--muted2)}
 
     <!-- ── TOTAL PROFITS ─────────────────────── -->
     <div class="page" id="page-profits">
-      <div class="card">
+      <div class="card anim-card">
         <div class="card-title">EUR investments (Revolut)</div>
         <table class="tbl" id="prof-eur-tbl"></table>
       </div>
-      <div class="card">
+      <div class="card anim-card">
         <div class="card-title">GHS investments (IC &amp; Plus)</div>
         <table class="tbl" id="prof-ghs-tbl"></table>
       </div>
@@ -618,19 +707,52 @@ input::placeholder{color:var(--muted2)}
 <script>
 // ═══════════════════════════════════════════════════════════ DATA
 const BASE = [
-  {id:'alto',    name:'Alto Ingredients Inc',      short:'Alto',         platform:'REVOLUT',cur:'EUR',deposited:117.63,lastVal:146.73,sector:'Chemicals',    startDate:'2026-03-05'},
-  {id:'vanguard',name:'Vanguard FTSE All World',   short:'V. FTSE',      platform:'REVOLUT',cur:'EUR',deposited:690.09,lastVal:96.04, sector:'Global ETF',   startDate:'2026-01-15'},
-  {id:'netflix', name:'Netflix',                   short:'Netflix',      platform:'REVOLUT',cur:'EUR',deposited:42.33, lastVal:41.37, sector:'Streaming',    startDate:'2026-01-26'},
-  {id:'amundi',  name:'Amundi S&P 500 ETF',        short:'Amundi S&P',   platform:'REVOLUT',cur:'EUR',deposited:40.00, lastVal:41.65, sector:'US ETF',       startDate:'2026-01-15'},
-  {id:'vsp500',  name:'Vanguard S&P 500 Dist',     short:'V. S&P 500',   platform:'REVOLUT',cur:'EUR',deposited:40.00, lastVal:41.64, sector:'US ETF',       startDate:'2026-01-15'},
-  {id:'nvidia',  name:'Nvidia',                    short:'Nvidia',       platform:'REVOLUT',cur:'EUR',deposited:17.60, lastVal:17.50, sector:'Tech',          startDate:'2025-11-03'},
-  {id:'nano',    name:'Nano Nuclear Energy',       short:'Nano Nuclear', platform:'REVOLUT',cur:'EUR',deposited:17.29, lastVal:19.46, sector:'Energy',        startDate:'2026-03-11'},
-  {id:'ge',      name:'GE Aerospace',              short:'GE Aero',      platform:'REVOLUT',cur:'EUR',deposited:105.07,lastVal:18.97, sector:'Aerospace',     startDate:'2026-04-21'},
-  {id:'spacex',  name:'SpaceX',                   short:'SpaceX',       platform:'REVOLUT',cur:'EUR',deposited:17.36, lastVal:11.76, sector:'Aerospace',     startDate:'2026-06-12'},
-  {id:'ic',      name:'IC Liquidity Fund',         short:'IC Fund',      platform:'IC',     cur:'GHS',deposited:3700,  lastVal:3198.73,sector:'Fixed Income',  startDate:'2025-11-17'},
-  {id:'plus',    name:'Plus Invest',               short:'Plus Invest',  platform:'PLUS',   cur:'GHS',deposited:1500,  lastVal:1533.95,sector:'Fixed Income',  startDate:'2026-01-07'},
+  {id:'alto',    name:'Alto Ingredients Inc',      short:'Alto',         platform:'REVOLUT',cur:'EUR',deposited:117.63,lastVal:103.83,sector:'Chemicals',    startDate:'2026-03-05'},
+  {id:'vanguard',name:'Vanguard FTSE All World',   short:'V. FTSE',      platform:'REVOLUT',cur:'EUR',deposited:690.09,lastVal:706.19,sector:'Global ETF',   startDate:'2026-01-15'},
+  {id:'netflix', name:'Netflix',                   short:'Netflix',      platform:'REVOLUT',cur:'EUR',deposited:42.33, lastVal:39.20, sector:'Streaming',    startDate:'2026-01-26'},
+  {id:'amundi',  name:'Amundi S&P 500 ETF',        short:'Amundi S&P',   platform:'REVOLUT',cur:'EUR',deposited:40.00, lastVal:42.53, sector:'US ETF',       startDate:'2026-01-15'},
+  {id:'vsp500',  name:'Vanguard S&P 500 Dist',     short:'V. S&P 500',   platform:'REVOLUT',cur:'EUR',deposited:40.00, lastVal:42.42, sector:'US ETF',       startDate:'2026-01-15'},
+  {id:'nvidia',  name:'Nvidia',                    short:'Nvidia',       platform:'REVOLUT',cur:'EUR',deposited:17.60, lastVal:18.23, sector:'Tech',          startDate:'2025-11-03'},
+  {id:'nano',    name:'Nano Nuclear Energy',       short:'Nano Nuclear', platform:'REVOLUT',cur:'EUR',deposited:17.29, lastVal:12.30, sector:'Energy',        startDate:'2026-03-11'},
+  {id:'ge',      name:'GE Aerospace',              short:'GE Aero',      platform:'REVOLUT',cur:'EUR',deposited:105.07,lastVal:98.78, sector:'Aerospace',     startDate:'2026-04-21'},
+  {id:'spacex',  name:'SpaceX',                   short:'SpaceX',       platform:'REVOLUT',cur:'EUR',deposited:17.36, lastVal:14.61, sector:'Aerospace',     startDate:'2026-06-12'},
+  {id:'ic',      name:'IC Liquidity Fund',         short:'IC Fund',      platform:'IC',     cur:'GHS',deposited:3700,  lastVal:3869.49,sector:'Fixed Income',  startDate:'2025-11-17'},
+  {id:'plus',    name:'Plus Invest',               short:'Plus Invest',  platform:'PLUS',   cur:'GHS',deposited:1500,  lastVal:1554.82,sector:'Fixed Income',  startDate:'2026-01-07'},
 ];
 
+const MASTER_DEPOSITS = [
+    {type:'deposit',date:'2026-03-05',id:'alto',    name:'Alto Ingredients Inc',   amount:86.61, currency:'EUR',platform:'REVOLUT',prevTotal:0,     newTotal:86.61, savedAt:'2026-03-05T00:00:00.000Z'},
+    {type:'deposit',date:'2026-05-01',id:'alto',    name:'Alto Ingredients Inc',   amount:31.02, currency:'EUR',platform:'REVOLUT',prevTotal:86.61,  newTotal:117.63,savedAt:'2026-05-01T00:00:00.000Z'},
+    {type:'deposit',date:'2026-01-15',id:'vanguard',name:'Vanguard FTSE All World',amount:20.00, currency:'EUR',platform:'REVOLUT',prevTotal:0,      newTotal:20.00, savedAt:'2026-01-15T00:00:00.000Z'},
+    {type:'deposit',date:'2026-01-19',id:'vanguard',name:'Vanguard FTSE All World',amount:20.00, currency:'EUR',platform:'REVOLUT',prevTotal:20.00,  newTotal:40.00, savedAt:'2026-01-19T00:00:00.000Z'},
+    {type:'deposit',date:'2026-02-23',id:'vanguard',name:'Vanguard FTSE All World',amount:40.00, currency:'EUR',platform:'REVOLUT',prevTotal:40.00,  newTotal:80.00, savedAt:'2026-02-23T00:00:00.000Z'},
+    {type:'deposit',date:'2026-04-21',id:'vanguard',name:'Vanguard FTSE All World',amount:10.00, currency:'EUR',platform:'REVOLUT',prevTotal:80.00,  newTotal:90.00, savedAt:'2026-04-21T00:00:00.000Z'},
+    {type:'deposit',date:'2026-06-22',id:'vanguard',name:'Vanguard FTSE All World',amount:100.00,currency:'EUR',platform:'REVOLUT',prevTotal:90.00,  newTotal:190.00,savedAt:'2026-06-22T00:00:00.000Z'},
+    {type:'deposit',date:'2026-07-27',id:'vanguard',name:'Vanguard FTSE All World',amount:400.00,currency:'EUR',platform:'REVOLUT',prevTotal:190.00, newTotal:590.00,savedAt:'2026-07-27T00:00:00.000Z'},
+    {type:'deposit',date:'2026-07-27',id:'vanguard',name:'Vanguard FTSE All World',amount:100.09,currency:'EUR',platform:'REVOLUT',prevTotal:590.00, newTotal:690.09,savedAt:'2026-07-27T06:00:00.000Z'},
+    {type:'deposit',date:'2026-01-26',id:'netflix', name:'Netflix',               amount:42.33, currency:'EUR',platform:'REVOLUT',prevTotal:0,      newTotal:42.33, savedAt:'2026-01-26T00:00:00.000Z'},
+    {type:'deposit',date:'2026-01-15',id:'amundi',  name:'Amundi S&P 500 ETF',    amount:20.00, currency:'EUR',platform:'REVOLUT',prevTotal:0,      newTotal:20.00, savedAt:'2026-01-15T00:00:00.000Z'},
+    {type:'deposit',date:'2026-01-19',id:'amundi',  name:'Amundi S&P 500 ETF',    amount:20.00, currency:'EUR',platform:'REVOLUT',prevTotal:20.00,  newTotal:40.00, savedAt:'2026-01-19T00:00:00.000Z'},
+    {type:'deposit',date:'2026-01-15',id:'vsp500',  name:'Vanguard S&P 500 Dist', amount:20.00, currency:'EUR',platform:'REVOLUT',prevTotal:0,      newTotal:20.00, savedAt:'2026-01-15T00:00:00.000Z'},
+    {type:'deposit',date:'2026-01-19',id:'vsp500',  name:'Vanguard S&P 500 Dist', amount:20.00, currency:'EUR',platform:'REVOLUT',prevTotal:20.00,  newTotal:40.00, savedAt:'2026-01-19T00:00:00.000Z'},
+    {type:'deposit',date:'2025-11-03',id:'nvidia',  name:'Nvidia',                amount:17.60, currency:'EUR',platform:'REVOLUT',prevTotal:0,      newTotal:17.60, savedAt:'2025-11-03T00:00:00.000Z'},
+    {type:'deposit',date:'2026-03-11',id:'nano',    name:'Nano Nuclear Energy',   amount:17.29, currency:'EUR',platform:'REVOLUT',prevTotal:0,      newTotal:17.29, savedAt:'2026-03-11T00:00:00.000Z'},
+    {type:'deposit',date:'2026-04-21',id:'ge',      name:'GE Aerospace',          amount:17.06, currency:'EUR',platform:'REVOLUT',prevTotal:0,      newTotal:17.06, savedAt:'2026-04-21T00:00:00.000Z'},
+    {type:'deposit',date:'2026-08-03',id:'ge',      name:'GE Aerospace',          amount:88.01, currency:'EUR',platform:'REVOLUT',prevTotal:17.06,  newTotal:105.07,savedAt:'2026-08-03T00:00:00.000Z'},
+    {type:'deposit',date:'2026-06-12',id:'spacex',  name:'SpaceX',               amount:17.36, currency:'EUR',platform:'REVOLUT',prevTotal:0,      newTotal:17.36, savedAt:'2026-06-12T00:00:00.000Z'},
+    {type:'deposit',date:'2025-11-17',id:'ic',      name:'IC Liquidity Fund',     amount:1000,  currency:'GHS',platform:'IC',     prevTotal:0,      newTotal:1000,  savedAt:'2025-11-17T00:00:00.000Z'},
+    {type:'deposit',date:'2025-12-07',id:'ic',      name:'IC Liquidity Fund',     amount:500,   currency:'GHS',platform:'IC',     prevTotal:1000,   newTotal:1500,  savedAt:'2025-12-07T00:00:00.000Z'},
+    {type:'deposit',date:'2026-01-27',id:'ic',      name:'IC Liquidity Fund',     amount:200,   currency:'GHS',platform:'IC',     prevTotal:1500,   newTotal:1700,  savedAt:'2026-01-27T00:00:00.000Z'},
+    {type:'deposit',date:'2026-02-23',id:'ic',      name:'IC Liquidity Fund',     amount:200,   currency:'GHS',platform:'IC',     prevTotal:1700,   newTotal:1900,  savedAt:'2026-02-23T00:00:00.000Z'},
+    {type:'deposit',date:'2026-02-23',id:'ic',      name:'IC Liquidity Fund',     amount:200,   currency:'GHS',platform:'IC',     prevTotal:1900,   newTotal:2100,  savedAt:'2026-02-23T06:00:00.000Z'},
+    {type:'deposit',date:'2026-05-17',id:'ic',      name:'IC Liquidity Fund',     amount:1000,  currency:'GHS',platform:'IC',     prevTotal:2100,   newTotal:3100,  savedAt:'2026-05-17T00:00:00.000Z'},
+    {type:'deposit',date:'2026-08-27',id:'ic',      name:'IC Liquidity Fund',     amount:600,   currency:'GHS',platform:'IC',     prevTotal:3100,   newTotal:3700,  savedAt:'2026-08-27T00:00:00.000Z'},
+    {type:'deposit',date:'2026-01-07',id:'plus',    name:'Plus Invest',           amount:500,   currency:'GHS',platform:'PLUS',   prevTotal:0,      newTotal:500,   savedAt:'2026-01-07T00:00:00.000Z'},
+    {type:'deposit',date:'2026-02-04',id:'plus',    name:'Plus Invest',           amount:1000,  currency:'GHS',platform:'PLUS',   prevTotal:500,    newTotal:1500,  savedAt:'2026-02-04T00:00:00.000Z'},
+  ];
+
+const DATA_VERSION = 'v4-2026-09-02-corrected';
+let forceDrivePushOnConnect = false;
 let valEntries = JSON.parse(localStorage.getItem('v2_val')||'[]');
 let depEntries = JSON.parse(localStorage.getItem('v2_dep')||'[]');
 let activePeriod = 0;
@@ -698,40 +820,26 @@ function nav(el){
 
 // ═══════════════════════════════════════════════════════════ INIT
 window.addEventListener('load',()=>{
+  // ── DATA VERSION CHECK ──────────────────────────────────────
+  // If this is a newer corrected build than what's cached locally,
+  // wipe stale valuations/deposits and force-push the corrected data to Drive.
+  const storedVersion = localStorage.getItem('_data_version');
+  if(storedVersion !== DATA_VERSION){
+    valEntries = [];
+    depEntries = [];
+    try{
+      localStorage.setItem('v2_val','[]');
+      localStorage.setItem('v2_dep','[]');
+      localStorage.setItem('_data_version', DATA_VERSION);
+    }catch(e){}
+    forceDrivePushOnConnect = true;
+  }
+
   document.getElementById('val-date').value=thisSunday();
   document.getElementById('dep-date').value=today();
   document.getElementById('ni-date').value=today();
   // Seed correct deposit history if localStorage is empty or missing entries
-  const MASTER_DEPOSITS = [
-    {type:'deposit',date:'2026-03-05',id:'alto',    name:'Alto Ingredients Inc',   amount:86.61, currency:'EUR',platform:'REVOLUT',prevTotal:0,     newTotal:86.61, savedAt:'2026-03-05T00:00:00.000Z'},
-    {type:'deposit',date:'2026-05-01',id:'alto',    name:'Alto Ingredients Inc',   amount:31.02, currency:'EUR',platform:'REVOLUT',prevTotal:86.61,  newTotal:117.63,savedAt:'2026-05-01T00:00:00.000Z'},
-    {type:'deposit',date:'2026-01-15',id:'vanguard',name:'Vanguard FTSE All World',amount:20.00, currency:'EUR',platform:'REVOLUT',prevTotal:0,      newTotal:20.00, savedAt:'2026-01-15T00:00:00.000Z'},
-    {type:'deposit',date:'2026-01-19',id:'vanguard',name:'Vanguard FTSE All World',amount:20.00, currency:'EUR',platform:'REVOLUT',prevTotal:20.00,  newTotal:40.00, savedAt:'2026-01-19T00:00:00.000Z'},
-    {type:'deposit',date:'2026-02-23',id:'vanguard',name:'Vanguard FTSE All World',amount:40.00, currency:'EUR',platform:'REVOLUT',prevTotal:40.00,  newTotal:80.00, savedAt:'2026-02-23T00:00:00.000Z'},
-    {type:'deposit',date:'2026-04-21',id:'vanguard',name:'Vanguard FTSE All World',amount:10.00, currency:'EUR',platform:'REVOLUT',prevTotal:80.00,  newTotal:90.00, savedAt:'2026-04-21T00:00:00.000Z'},
-    {type:'deposit',date:'2026-06-22',id:'vanguard',name:'Vanguard FTSE All World',amount:100.00,currency:'EUR',platform:'REVOLUT',prevTotal:90.00,  newTotal:190.00,savedAt:'2026-06-22T00:00:00.000Z'},
-    {type:'deposit',date:'2026-07-27',id:'vanguard',name:'Vanguard FTSE All World',amount:400.00,currency:'EUR',platform:'REVOLUT',prevTotal:190.00, newTotal:590.00,savedAt:'2026-07-27T00:00:00.000Z'},
-    {type:'deposit',date:'2026-07-27',id:'vanguard',name:'Vanguard FTSE All World',amount:100.09,currency:'EUR',platform:'REVOLUT',prevTotal:590.00, newTotal:690.09,savedAt:'2026-07-27T06:00:00.000Z'},
-    {type:'deposit',date:'2026-01-26',id:'netflix', name:'Netflix',               amount:42.33, currency:'EUR',platform:'REVOLUT',prevTotal:0,      newTotal:42.33, savedAt:'2026-01-26T00:00:00.000Z'},
-    {type:'deposit',date:'2026-01-15',id:'amundi',  name:'Amundi S&P 500 ETF',    amount:20.00, currency:'EUR',platform:'REVOLUT',prevTotal:0,      newTotal:20.00, savedAt:'2026-01-15T00:00:00.000Z'},
-    {type:'deposit',date:'2026-01-19',id:'amundi',  name:'Amundi S&P 500 ETF',    amount:20.00, currency:'EUR',platform:'REVOLUT',prevTotal:20.00,  newTotal:40.00, savedAt:'2026-01-19T00:00:00.000Z'},
-    {type:'deposit',date:'2026-01-15',id:'vsp500',  name:'Vanguard S&P 500 Dist', amount:20.00, currency:'EUR',platform:'REVOLUT',prevTotal:0,      newTotal:20.00, savedAt:'2026-01-15T00:00:00.000Z'},
-    {type:'deposit',date:'2026-01-19',id:'vsp500',  name:'Vanguard S&P 500 Dist', amount:20.00, currency:'EUR',platform:'REVOLUT',prevTotal:20.00,  newTotal:40.00, savedAt:'2026-01-19T00:00:00.000Z'},
-    {type:'deposit',date:'2025-11-03',id:'nvidia',  name:'Nvidia',                amount:17.60, currency:'EUR',platform:'REVOLUT',prevTotal:0,      newTotal:17.60, savedAt:'2025-11-03T00:00:00.000Z'},
-    {type:'deposit',date:'2026-03-11',id:'nano',    name:'Nano Nuclear Energy',   amount:17.29, currency:'EUR',platform:'REVOLUT',prevTotal:0,      newTotal:17.29, savedAt:'2026-03-11T00:00:00.000Z'},
-    {type:'deposit',date:'2026-04-21',id:'ge',      name:'GE Aerospace',          amount:17.06, currency:'EUR',platform:'REVOLUT',prevTotal:0,      newTotal:17.06, savedAt:'2026-04-21T00:00:00.000Z'},
-    {type:'deposit',date:'2026-08-03',id:'ge',      name:'GE Aerospace',          amount:88.01, currency:'EUR',platform:'REVOLUT',prevTotal:17.06,  newTotal:105.07,savedAt:'2026-08-03T00:00:00.000Z'},
-    {type:'deposit',date:'2026-06-12',id:'spacex',  name:'SpaceX',               amount:17.36, currency:'EUR',platform:'REVOLUT',prevTotal:0,      newTotal:17.36, savedAt:'2026-06-12T00:00:00.000Z'},
-    {type:'deposit',date:'2025-11-17',id:'ic',      name:'IC Liquidity Fund',     amount:1000,  currency:'GHS',platform:'IC',     prevTotal:0,      newTotal:1000,  savedAt:'2025-11-17T00:00:00.000Z'},
-    {type:'deposit',date:'2025-12-07',id:'ic',      name:'IC Liquidity Fund',     amount:500,   currency:'GHS',platform:'IC',     prevTotal:1000,   newTotal:1500,  savedAt:'2025-12-07T00:00:00.000Z'},
-    {type:'deposit',date:'2026-01-27',id:'ic',      name:'IC Liquidity Fund',     amount:200,   currency:'GHS',platform:'IC',     prevTotal:1500,   newTotal:1700,  savedAt:'2026-01-27T00:00:00.000Z'},
-    {type:'deposit',date:'2026-02-23',id:'ic',      name:'IC Liquidity Fund',     amount:200,   currency:'GHS',platform:'IC',     prevTotal:1700,   newTotal:1900,  savedAt:'2026-02-23T00:00:00.000Z'},
-    {type:'deposit',date:'2026-02-23',id:'ic',      name:'IC Liquidity Fund',     amount:200,   currency:'GHS',platform:'IC',     prevTotal:1900,   newTotal:2100,  savedAt:'2026-02-23T06:00:00.000Z'},
-    {type:'deposit',date:'2026-05-17',id:'ic',      name:'IC Liquidity Fund',     amount:1000,  currency:'GHS',platform:'IC',     prevTotal:2100,   newTotal:3100,  savedAt:'2026-05-17T00:00:00.000Z'},
-    {type:'deposit',date:'2026-08-27',id:'ic',      name:'IC Liquidity Fund',     amount:600,   currency:'GHS',platform:'IC',     prevTotal:3100,   newTotal:3700,  savedAt:'2026-08-27T00:00:00.000Z'},
-    {type:'deposit',date:'2026-01-07',id:'plus',    name:'Plus Invest',           amount:500,   currency:'GHS',platform:'PLUS',   prevTotal:0,      newTotal:500,   savedAt:'2026-01-07T00:00:00.000Z'},
-    {type:'deposit',date:'2026-02-04',id:'plus',    name:'Plus Invest',           amount:1000,  currency:'GHS',platform:'PLUS',   prevTotal:500,    newTotal:1500,  savedAt:'2026-02-04T00:00:00.000Z'},
-  ];
+  // (MASTER_DEPOSITS now defined globally above)
   // Only seed if localStorage has fewer entries than master (first load or new device)
   if(depEntries.length < MASTER_DEPOSITS.length){
     depEntries = MASTER_DEPOSITS;
@@ -762,6 +870,159 @@ function setFxRate(val){
   const r=parseFloat(val);
   if(!isNaN(r)&&r>0){ghsToEurRate=r;try{localStorage.setItem('_fx_ghs_eur',r);}catch(e){}buildKPIs();}
 }
+
+// ═══════════════════════════════════════════════════ VISUAL CHARTS
+const SECTOR_COLORS = {
+  'Chemicals':'#00d4aa','Global ETF':'#4da6ff','Streaming':'#ff5c5c','US ETF':'#8b7fff',
+  'Tech':'#2ecc8f','Energy':'#f5a623','Aerospace':'#ff8fd4','Fixed Income':'#ffd166',
+};
+function sectorColor(sector){ return SECTOR_COLORS[sector] || '#6d8aa0'; }
+
+function buildDonutChart(){
+  const el=document.getElementById('donut-chart');
+  if(!el)return;
+  // Group by sector, using EUR-equivalent value for fair sizing
+  const groups={};
+  BASE.forEach(inv=>{
+    const val=getLastVal(inv.id);
+    const eurVal = inv.cur==='GHS' ? val*ghsToEurRate : val;
+    if(!groups[inv.sector]) groups[inv.sector]=0;
+    groups[inv.sector]+=eurVal;
+  });
+  const total=Object.values(groups).reduce((s,v)=>s+v,0);
+  const entries=Object.entries(groups).sort((a,b)=>b[1]-a[1]);
+
+  const R=70, CX=90, CY=90, STROKE=22;
+  const circumference=2*Math.PI*R;
+  let offset=0;
+  const segs=entries.map(([sector,val],i)=>{
+    const frac=val/total;
+    const dash=frac*circumference;
+    const seg=`<circle class="donut-seg" cx="${CX}" cy="${CY}" r="${R}" fill="none" stroke="${sectorColor(sector)}"
+      stroke-width="${STROKE}" stroke-dasharray="${dash} ${circumference-dash}" stroke-dashoffset="${-offset}"
+      transform="rotate(-90 ${CX} ${CY})" style="animation:fadeIn .6s ease-out ${i*0.08}s backwards"><title>${sector}: €${val.toFixed(0)} (${(frac*100).toFixed(0)}%)</title></circle>`;
+    offset+=dash;
+    return seg;
+  }).join('');
+
+  const legend=entries.map(([sector,val])=>{
+    const pct=(val/total*100).toFixed(0);
+    return `<div class="donut-legend-item">
+      <span class="donut-legend-dot" style="background:${sectorColor(sector)}"></span>
+      <span class="donut-legend-label">${sector}</span>
+      <span class="donut-legend-val">${pct}%</span>
+    </div>`;
+  }).join('');
+
+  el.innerHTML=`
+    <svg width="180" height="180" viewBox="0 0 180 180">${segs}</svg>
+    <div style="text-align:center;margin-top:-118px;pointer-events:none">
+      <div class="donut-center-label">Total value</div>
+      <div class="donut-center-val">€${total.toFixed(0)}</div>
+    </div>
+    <div style="height:56px"></div>
+    <div class="donut-legend">${legend}</div>
+  `;
+}
+
+function buildBarChart(){
+  const el=document.getElementById('barchart');
+  if(!el)return;
+  const rows=BASE.map(inv=>{
+    const dep=getTotalDeposited(inv.id);
+    const val=getLastVal(inv.id);
+    const pl=val-dep;
+    const pct=dep>0?(pl/dep)*100:0;
+    return {inv,pl,pct};
+  }).sort((a,b)=>b.pct-a.pct);
+
+  const maxAbsPct=Math.max(...rows.map(r=>Math.abs(r.pct)),1);
+
+  el.innerHTML=rows.map((r,i)=>{
+    const widthPct=Math.min((Math.abs(r.pct)/maxAbsPct)*50,50);
+    const isPos=r.pct>=0;
+    return `<div class="barchart-row" style="animation:fadeSlideUp .4s ease-out ${i*0.04}s backwards">
+      <div class="barchart-label" title="${r.inv.name}">${r.inv.short}</div>
+      <div class="barchart-track">
+        <div class="barchart-zero"></div>
+        <div class="barchart-fill ${isPos?'pos':'neg'}" style="width:${widthPct}%" data-target="${widthPct}"></div>
+      </div>
+      <div class="barchart-val ${isPos?'pos':'neg'}">${isPos?'+':''}${r.pct.toFixed(1)}%</div>
+    </div>`;
+  }).join('');
+
+  // Trigger animation after paint
+  requestAnimationFrame(()=>{
+    setTimeout(()=>{
+      document.querySelectorAll('.barchart-fill').forEach(bar=>{
+        const target=bar.getAttribute('data-target');
+        bar.style.width='0%';
+        requestAnimationFrame(()=>{ bar.style.width=target+'%'; });
+      });
+    },30);
+  });
+}
+
+function buildGrowthChart(){
+  const el=document.getElementById('growth-chart');
+  if(!el)return;
+  if(valEntries.length<2){
+    el.innerHTML=`<p style="color:var(--muted);font-size:12px;padding:1.5rem 0;text-align:center">Add at least 2 weekly valuation entries to see your portfolio growth chart.</p>`;
+    return;
+  }
+  // Build cumulative EUR-equivalent net worth at each valuation entry date
+  const dates=[...new Set(valEntries.map(e=>e.date))].sort();
+  const points=dates.map(date=>{
+    const eIdx=valEntries.findLastIndex(e=>e.date===date);
+    let total=0;
+    BASE.forEach(inv=>{
+      const v=getValAt(inv.id,eIdx);
+      total += inv.cur==='GHS' ? v*ghsToEurRate : v;
+    });
+    return {date,total};
+  });
+
+  const W=800,H=180,PAD=30;
+  const vals=points.map(p=>p.total);
+  const min=Math.min(...vals)*0.95, max=Math.max(...vals)*1.05;
+  const range=max-min||1;
+
+  const xy=(i,v)=>{
+    const x=PAD+(i/(points.length-1))*(W-PAD*2);
+    const y=H-PAD-((v-min)/range)*(H-PAD*2);
+    return [x,y];
+  };
+
+  const linePts=points.map((p,i)=>xy(i,p.total));
+  const pathD='M'+linePts.map(([x,y])=>`${x.toFixed(1)},${y.toFixed(1)}`).join(' L');
+  const areaD=pathD+` L${linePts[linePts.length-1][0].toFixed(1)},${H-PAD} L${linePts[0][0].toFixed(1)},${H-PAD} Z`;
+
+  const dots=linePts.map(([x,y],i)=>
+    `<circle class="dot" cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="3.5" fill="var(--teal)" stroke="var(--navy)" stroke-width="1.5" style="animation-delay:${1.2+i*0.05}s"><title>${points[i].date}: €${points[i].total.toFixed(0)}</title></circle>`
+  ).join('');
+
+  const firstVal=points[0].total, lastVal=points[points.length-1].total;
+  const growthPct=((lastVal-firstVal)/firstVal*100);
+
+  el.innerHTML=`
+    <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:.6rem">
+      <div style="font-family:'DM Mono',monospace;font-size:11px;color:var(--muted)">${points[0].date} → ${points[points.length-1].date}</div>
+      <div style="font-family:'DM Mono',monospace;font-size:13px;font-weight:700;color:${growthPct>=0?'var(--green)':'var(--red)'}">${growthPct>=0?'+':''}${growthPct.toFixed(1)}% over period</div>
+    </div>
+    <svg class="area-chart-svg" viewBox="0 0 ${W} ${H}" style="width:100%;height:auto;overflow:visible">
+      <defs>
+        <linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="var(--teal)" stop-opacity="0.28"/>
+          <stop offset="100%" stop-color="var(--teal)" stop-opacity="0"/>
+        </linearGradient>
+      </defs>
+      <path class="fill-area" d="${areaD}" fill="url(#areaGrad)"/>
+      <path class="line" d="${pathD}" fill="none" stroke="var(--teal)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+      ${dots}
+    </svg>
+  `;
+}
+
 function buildKPIs(){
   const eurPL=BASE.filter(i=>i.cur==='EUR').reduce((s,i)=>s+(getLastVal(i.id)-getTotalDeposited(i.id)),0);
   const ghsPL=BASE.filter(i=>i.cur==='GHS').reduce((s,i)=>s+(getLastVal(i.id)-getTotalDeposited(i.id)),0);
@@ -783,12 +1044,15 @@ function buildKPIs(){
     {label:'EUR total invested',val:totalDep,fmt:v=>fmt2(v),cls:'neu',sub:'across '+BASE.filter(i=>i.cur==='EUR').length+' positions',k:'k3'},
     {label:'Net worth (€ equiv.)',val:netWorthEUR,fmt:v=>'€'+fmt2(v),cls:'neu',sub:'fx',k:'k4',fx:true},
   ];
-  document.getElementById('kpi-strip').innerHTML=kpis.map(k=>`
-    <div class="kpi ${k.k}">
+  document.getElementById('kpi-strip').innerHTML=kpis.map((k,i)=>`
+    <div class="kpi ${k.k} anim-card" style="animation-delay:${i*0.05}s">
       <div class="kpi-label">${k.label}</div>
       <div class="kpi-val ${k.cls}">${k.fmt(k.val)}</div>
       ${k.fx?`<div class="fx-input-row">1 GHS = <input type="number" step="0.001" value="${ghsToEurRate}" onchange="setFxRate(this.value)"> EUR</div>`:`<div class="kpi-sub">${k.sub}</div>`}
     </div>`).join('');
+  buildDonutChart();
+  buildBarChart();
+  buildGrowthChart();
 }
 
 // ═══════════════════════════════════════════════════════════ DASHBOARD TABLE
@@ -827,18 +1091,25 @@ function buildDash(){
     const trCls=tr==='▲'?'pos':tr==='▼'?'neg':'';
     const sd=inv.startDate||'—';
     const daysHeld=inv.startDate?Math.floor((new Date()-new Date(inv.startDate))/(1000*60*60*24)):null;
-    return `<tr>
+    const barPct=Math.min(Math.abs(pct)*100*2,100);
+    const barColor=pct>=0?'var(--green)':'var(--red)';
+    return `<tr style="animation:fadeIn .4s ease-out backwards">
       <td><div class="inv-name">${inv.name}</div><div class="inv-meta"><span class="badge badge-${inv.cur.toLowerCase()}">${inv.cur}</span> ${inv.platform} · ${inv.sector}</div></td>
       <td class="muted" style="white-space:nowrap">${sd}</td>
       <td class="muted">${daysHeld!==null?daysHeld+'d':'—'}</td>
       <td class="muted">${fmt2(dep)}</td>
       <td>${fmt2(val)}</td>
       <td class="${colorClass(pl)}">${pl>=0?'+':''}${fmt2(pl)}</td>
-      <td class="${colorClass(pct)}">${fmtPct(pct)}</td>
+      <td class="${colorClass(pct)}">${fmtPct(pct)}<div class="pct-mini-bar" style="margin-left:auto"><div class="pct-mini-fill" data-w="${barPct}" style="background:${barColor}"></div></div></td>
       <td class="${trCls}" style="font-size:14px;text-align:right">${tr}</td>
       <td style="text-align:right">${sparklineSVG(inv.id)}</td>
     </tr>`;
   }).join('');
+  requestAnimationFrame(()=>{
+    setTimeout(()=>{
+      document.querySelectorAll('.pct-mini-fill').forEach(b=>{ b.style.width=b.getAttribute('data-w')+'%'; });
+    },50);
+  });
 }
 
 // ═══════════════════════════════════════════════════════════ PERFORMANCE
@@ -1421,16 +1692,30 @@ function buildGoalProgress(){
   const current=eurVal+(ghsVal*rate);
   const pct=Math.min((current/target)*100,100);
   const remaining=Math.max(target-current,0);
+  const R=54, C=2*Math.PI*R;
+  const dash=(pct/100)*C;
   el.innerHTML=`
-    <div style="display:flex;justify-content:space-between;margin-bottom:6px;font-family:'DM Mono',monospace;font-size:12px">
-      <span>€${fmt2(current)} of €${fmt2(target)}</span>
-      <span style="color:var(--teal);font-weight:600">${pct.toFixed(1)}%</span>
+    <div class="goal-ring-wrap">
+      <svg width="128" height="128" viewBox="0 0 128 128">
+        <circle cx="64" cy="64" r="${R}" fill="none" stroke="var(--navy3)" stroke-width="10"/>
+        <circle class="goal-ring-svg" cx="64" cy="64" r="${R}" fill="none" stroke="var(--teal)" stroke-width="10"
+          stroke-linecap="round" stroke-dasharray="${C}" stroke-dashoffset="${C}" transform="rotate(-90 64 64)"
+          id="eur-ring-circle"/>
+        <text x="64" y="60" text-anchor="middle" class="goal-ring-center" fill="var(--white)">${pct.toFixed(0)}%</text>
+        <text x="64" y="76" text-anchor="middle" fill="var(--muted)" font-size="9" font-family="DM Mono, monospace">of goal</text>
+      </svg>
+      <div style="flex:1;min-width:160px">
+        <div style="font-family:'DM Mono',monospace;font-size:13px;margin-bottom:4px">€${fmt2(current)} <span style="color:var(--muted)">of €${fmt2(target)}</span></div>
+        <div style="font-family:'DM Mono',monospace;font-size:12px;color:${remaining>0?'var(--muted)':'var(--green)'}">${remaining>0?'€'+fmt2(remaining)+' remaining':'🎉 Goal reached!'}</div>
+      </div>
     </div>
-    <div style="height:8px;background:var(--navy3);border-radius:4px;overflow:hidden">
-      <div style="height:100%;width:${pct}%;background:var(--teal);border-radius:4px;transition:width .4s"></div>
-    </div>
-    <div style="margin-top:6px;font-family:'DM Mono',monospace;font-size:11px;color:var(--muted)">${remaining>0?'€'+fmt2(remaining)+' remaining to reach your goal':'Goal reached! 🎉'}</div>
   `;
+  requestAnimationFrame(()=>{
+    setTimeout(()=>{
+      const circle=document.getElementById('eur-ring-circle');
+      if(circle) circle.style.strokeDashoffset=(C-dash).toString();
+    },80);
+  });
 }
 
 function saveGoalGHS(){
@@ -1451,16 +1736,30 @@ function buildGoalProgressGHS(){
   const current=BASE.filter(i=>i.cur==='GHS').reduce((s,i)=>s+getLastVal(i.id),0);
   const pct=Math.min((current/target)*100,100);
   const remaining=Math.max(target-current,0);
+  const R=54, C=2*Math.PI*R;
+  const dash=(pct/100)*C;
   el.innerHTML=`
-    <div style="display:flex;justify-content:space-between;margin-bottom:6px;font-family:'DM Mono',monospace;font-size:12px">
-      <span>GHS${fmt2(current)} of GHS${fmt2(target)}</span>
-      <span style="color:var(--amber);font-weight:600">${pct.toFixed(1)}%</span>
+    <div class="goal-ring-wrap">
+      <svg width="128" height="128" viewBox="0 0 128 128">
+        <circle cx="64" cy="64" r="${R}" fill="none" stroke="var(--navy3)" stroke-width="10"/>
+        <circle class="goal-ring-svg" cx="64" cy="64" r="${R}" fill="none" stroke="var(--amber)" stroke-width="10"
+          stroke-linecap="round" stroke-dasharray="${C}" stroke-dashoffset="${C}" transform="rotate(-90 64 64)"
+          id="ghs-ring-circle"/>
+        <text x="64" y="60" text-anchor="middle" class="goal-ring-center" fill="var(--white)">${pct.toFixed(0)}%</text>
+        <text x="64" y="76" text-anchor="middle" fill="var(--muted)" font-size="9" font-family="DM Mono, monospace">of goal</text>
+      </svg>
+      <div style="flex:1;min-width:160px">
+        <div style="font-family:'DM Mono',monospace;font-size:13px;margin-bottom:4px">GHS${fmt2(current)} <span style="color:var(--muted)">of GHS${fmt2(target)}</span></div>
+        <div style="font-family:'DM Mono',monospace;font-size:12px;color:${remaining>0?'var(--muted)':'var(--green)'}">${remaining>0?'GHS'+fmt2(remaining)+' remaining':'🎉 Goal reached!'}</div>
+      </div>
     </div>
-    <div style="height:8px;background:var(--navy3);border-radius:4px;overflow:hidden">
-      <div style="height:100%;width:${pct}%;background:var(--amber);border-radius:4px;transition:width .4s"></div>
-    </div>
-    <div style="margin-top:6px;font-family:'DM Mono',monospace;font-size:11px;color:var(--muted)">${remaining>0?'GHS'+fmt2(remaining)+' remaining to reach your goal':'Goal reached! 🎉'}</div>
   `;
+  requestAnimationFrame(()=>{
+    setTimeout(()=>{
+      const circle=document.getElementById('ghs-ring-circle');
+      if(circle) circle.style.strokeDashoffset=(C-dash).toString();
+    },80);
+  });
 }
 
 // ══════════════════════════════ PDF EXPORT (print-friendly summary)
@@ -1845,6 +2144,17 @@ function driveSignIn(silent){
 async function driveLoadOrCreate(){
   setSyncPill('syncing','<span class="spin">↻</span> Syncing...');
   try{
+    // If we just reset local data due to a corrected data version,
+    // overwrite Drive with the fresh corrected data instead of pulling old data from it.
+    if(forceDrivePushOnConnect){
+      forceDrivePushOnConnect=false;
+      await driveSaveNow();
+      buildKPIs();buildDash();buildValTable();buildHistory();
+      buildGoalProgress();buildGoalProgressGHS();updateBadges();
+      setSyncPill('synced','☁ Synced (corrected data pushed)');
+      showToast('☁ Corrected figures pushed to Google Drive');
+      return;
+    }
     let fileId=driveState.fileId;
     if(!fileId){
       const search=await driveGET(`https://www.googleapis.com/drive/v3/files?q=name='${DRIVE_FILE_NAME}' and trashed=false&fields=files(id,name,modifiedTime)&spaces=drive`);
@@ -1900,6 +2210,27 @@ async function forcePushToDrive(){
   showToast('Uploading all data to Google Drive...');
   await driveSaveNow();
   showToast('✓ All data pushed to Google Drive');
+}
+
+async function resetAndResync(){
+  if(!confirm('This will erase ALL locally saved weekly entries and reset every investment to the correct baseline figures. Any custom weekly valuations you added will be lost. Continue?')) return;
+  // Wipe all valuations, reseed deposits from the master list
+  valEntries = [];
+  depEntries = MASTER_DEPOSITS.slice();
+  try{
+    localStorage.setItem('v2_val', JSON.stringify(valEntries));
+    localStorage.setItem('v2_dep', JSON.stringify(depEntries));
+    localStorage.setItem('_data_version', DATA_VERSION);
+  }catch(e){}
+  buildKPIs(); buildDash(); buildValTable(); buildHistory();
+  buildGoalProgress(); buildGoalProgressGHS(); updateBadges();
+  if(driveState.connected && driveState.token){
+    showToast('Resetting local data and pushing correct figures to Drive...');
+    await driveSaveNow();
+    showToast('✓ Reset complete — correct figures now on this device and Google Drive');
+  } else {
+    showToast('✓ Reset complete locally — connect Google Drive to sync everywhere');
+  }
 }
 async function driveGET(url){
   const resp=await fetch(url,{headers:{'Authorization':'Bearer '+driveState.token}});
