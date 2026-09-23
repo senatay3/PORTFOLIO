@@ -333,6 +333,8 @@ input::placeholder{color:var(--muted2)}
   .area-chart-svg path.line{stroke-dasharray:1000;stroke-dashoffset:1000;animation:drawLine 1.4s cubic-bezier(.16,1,.3,1) forwards}
   .area-chart-svg path.fill-area{opacity:0;animation:fadeIn .8s ease-out .6s forwards}
   .area-chart-svg circle.dot{opacity:0;animation:scaleIn .3s ease-out forwards}
+  .area-chart-svg path.line-shimmer{opacity:.55;animation:cometFlow 3.5s linear infinite 1.6s}
+  @keyframes cometFlow{ from{stroke-dashoffset:0} to{stroke-dashoffset:-1032} }
 
   /* ── PROGRESS BAR IN TABLE (mini) ── */
   .pct-mini-bar{height:3px;border-radius:2px;background:var(--navy3);overflow:hidden;margin-top:3px;width:60px}
@@ -363,7 +365,7 @@ input::placeholder{color:var(--muted2)}
   transition:opacity .5s ease, visibility .5s ease;cursor:pointer;
 }
 .cover-page.hide{opacity:0;visibility:hidden;pointer-events:none}
-.cover-inner{text-align:center;max-width:420px;padding:2rem;animation:coverFadeUp .8s cubic-bezier(.16,1,.3,1) backwards}
+.cover-inner{position:relative;z-index:1;text-align:center;max-width:420px;padding:2rem;animation:coverFadeUp .8s cubic-bezier(.16,1,.3,1) backwards}
 .cover-mark{font-size:2.6rem;margin-bottom:.6rem;filter:drop-shadow(0 0 18px rgba(0,212,170,.5))}
 .cover-title{font-size:2.2rem;font-weight:800;letter-spacing:-.03em;line-height:1.05;margin-bottom:.7rem}
 .cover-title span{display:block;color:var(--teal)}
@@ -378,6 +380,23 @@ input::placeholder{color:var(--muted2)}
 #fin-bg-canvas{position:fixed;inset:0;z-index:0;pointer-events:none;opacity:0;transition:opacity .8s ease}
 #fin-bg-canvas.on{opacity:1}
 .sidebar,.main{position:relative;z-index:1}
+
+/* ── MORPH BLOCKS (catchy blob background, used on cover + Total Profits) ── */
+.morph-bg{position:absolute;inset:0;overflow:hidden;pointer-events:none;z-index:0}
+#page-profits>.card{position:relative;z-index:1}
+.morph-blob{position:absolute;filter:blur(46px);opacity:.5;mix-blend-mode:screen;will-change:transform,border-radius}
+.morph-blob{animation-name:morphShape,morphMove;animation-timing-function:ease-in-out;animation-iteration-count:infinite}
+@keyframes morphShape{
+  0%,100%{border-radius:42% 58% 65% 35%/45% 40% 60% 55%}
+  25%{border-radius:60% 40% 30% 70%/50% 60% 40% 50%}
+  50%{border-radius:35% 65% 55% 45%/60% 35% 65% 40%}
+  75%{border-radius:55% 45% 40% 60%/40% 55% 45% 60%}
+}
+@keyframes morphMove{
+  0%,100%{transform:translate(0,0) scale(1)}
+  33%{transform:translate(9%,-11%) scale(1.12)}
+  66%{transform:translate(-9%,9%) scale(0.88)}
+}
 
 /* ── DRAG-TO-REORDER (weekly entry) ──────────────── */
 .drag-handle{cursor:grab;text-align:center;color:var(--muted);font-size:14px;width:26px;user-select:none;touch-action:none}
@@ -413,6 +432,11 @@ input::placeholder{color:var(--muted2)}
 
 <!-- ══════════════════════════════════════════════════════════════ COVER PAGE -->
 <div class="cover-page" id="cover-page" onclick="dismissCover()">
+  <div class="morph-bg">
+    <div class="morph-blob" style="width:420px;height:420px;top:-100px;left:-100px;background:radial-gradient(circle, var(--teal), transparent 70%);animation-duration:18s,24s;animation-delay:0s,0s"></div>
+    <div class="morph-blob" style="width:380px;height:380px;bottom:-120px;right:-100px;background:radial-gradient(circle, var(--blue), transparent 70%);animation-duration:22s,19s;animation-delay:-5s,-2s"></div>
+    <div class="morph-blob" style="width:300px;height:300px;top:50%;left:50%;background:radial-gradient(circle, var(--green), transparent 70%);animation-duration:15s,21s;animation-delay:-9s,-4s"></div>
+  </div>
   <div class="cover-inner">
     <div class="cover-mark">📊</div>
     <h1 class="cover-title">Portfolio<span>Tracker</span></h1>
@@ -531,7 +555,7 @@ input::placeholder{color:var(--muted2)}
         <table class="tbl">
           <thead><tr>
             <th style="text-align:left">Investment</th>
-            <th>Start date</th><th>Days held</th><th>Deposited</th><th>Latest value</th><th>P&amp;L</th><th>% Return</th><th>Trend</th><th style="width:90px">Last 8 weeks</th>
+            <th>Start date</th><th>Days held</th><th>Deposited</th><th>Latest value</th><th>P&amp;L</th><th>% Return</th><th>Trend</th><th style="width:90px">Last 8 weeks</th><th style="width:70px"></th>
           </tr></thead>
           <tbody id="dash-body"></tbody>
         </table>
@@ -753,7 +777,14 @@ input::placeholder{color:var(--muted2)}
     </div>
 
     <!-- ── TOTAL PROFITS ─────────────────────── -->
-    <div class="page" id="page-profits">
+    <div class="page" id="page-profits" style="position:relative">
+      <div class="morph-bg" id="morph-bg-profits">
+        <div class="morph-blob" style="width:360px;height:360px;top:-80px;left:-60px;background:radial-gradient(circle, var(--teal), transparent 70%);animation-duration:16s,22s;animation-delay:0s,0s"></div>
+        <div class="morph-blob" style="width:320px;height:320px;top:140px;right:-80px;background:radial-gradient(circle, var(--green), transparent 70%);animation-duration:19s,25s;animation-delay:-4s,-6s"></div>
+        <div class="morph-blob" style="width:280px;height:280px;bottom:-50px;left:28%;background:radial-gradient(circle, var(--amber), transparent 70%);animation-duration:14s,18s;animation-delay:-8s,-3s"></div>
+        <div class="morph-blob" style="width:300px;height:300px;bottom:100px;right:18%;background:radial-gradient(circle, var(--blue), transparent 70%);animation-duration:21s,17s;animation-delay:-2s,-9s"></div>
+        <div class="morph-blob" style="width:240px;height:240px;top:40%;left:45%;background:radial-gradient(circle, var(--purple), transparent 70%);animation-duration:24s,15s;animation-delay:-11s,-1s"></div>
+      </div>
       <div class="card anim-card">
         <div class="card-title">EUR investments (Revolut)</div>
         <table class="tbl" id="prof-eur-tbl"></table>
@@ -761,6 +792,10 @@ input::placeholder{color:var(--muted2)}
       <div class="card anim-card">
         <div class="card-title">GHS investments (IC &amp; Plus)</div>
         <table class="tbl" id="prof-ghs-tbl"></table>
+      </div>
+      <div class="card anim-card">
+        <div class="card-title">💰 Sold investments — closed positions</div>
+        <div id="sold-list" style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px"></div>
       </div>
     </div>
 
@@ -781,6 +816,20 @@ input::placeholder{color:var(--muted2)}
       <button class="btn" onclick="closeDriveModal()">Cancel</button>
       <button class="btn btn-amber" onclick="forcePushToDrive()" id="force-push-btn" style="display:none">↑ Force upload local data</button>
       <button class="btn btn-teal" onclick="initDrive()">Connect &amp; Sync</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="sell-modal">
+  <div class="modal-box">
+    <h2>💰 Mark as sold</h2>
+    <p id="sell-modal-name" style="color:var(--white);font-weight:700;font-size:14px"></p>
+    <p style="margin-bottom:0">Sold investments are removed from your active dashboard, allocation and weekly entry — but kept as a permanent record with their final P&amp;L, under Total Profits.</p>
+    <div class="fg" style="margin-top:.8rem"><span class="fl">Sale date</span><input type="date" id="sell-date" style="width:100%"></div>
+    <div class="fg" style="margin-top:.8rem"><span class="fl">Sale proceeds (total)</span><input type="number" id="sell-price" step="0.01" style="width:100%"></div>
+    <div class="modal-actions">
+      <button class="btn" onclick="closeSellModal()">Cancel</button>
+      <button class="btn btn-teal" onclick="confirmSell()">✓ Confirm sale</button>
     </div>
   </div>
 </div>
@@ -837,6 +886,9 @@ let forceDrivePushOnConnect = false;
 let valEntries = JSON.parse(localStorage.getItem('v2_val')||'[]');
 let depEntries = JSON.parse(localStorage.getItem('v2_dep')||'[]');
 let activePeriod = 0;
+let soldInvs = JSON.parse(localStorage.getItem('_sold_invs')||'{}');
+function isSold(id){ return !!soldInvs[id]; }
+function activeBase(){ return BASE.filter(inv=>!isSold(inv.id)); }
 let selectedWeek = null;
 
 const PAGE_META = {
@@ -893,7 +945,7 @@ function nav(el){
   if(p==='weekly-diff'){buildWeeklyDiff();}
   if(p==='dep-history'){buildDepList();}
   if(p==='history'){buildHistory();}
-  if(p==='profits'){buildProfits();}
+  if(p==='profits'){buildProfits();buildSoldList();}
   if(p==='valuations'){buildValTable();}
   if(p==='trends'){buildTrends();}
   if(p==='new-investment'){buildNIList();}
@@ -1073,13 +1125,13 @@ function setAllocChart(c){
 function allocSlices(){
   const eurVal = inv => { const v=getLastVal(inv.id); return inv.cur==='GHS' ? v*ghsToEurRate : v; };
   if(allocView==='investment'){
-    return BASE.map(inv=>({
+    return activeBase().map(inv=>({
       key:inv.id, label:inv.name, color:sectorColor(inv.sector),
       val:eurVal(inv), items:[{name:inv.name,val:eurVal(inv),cur:inv.cur,raw:getLastVal(inv.id)}]
     })).sort((a,b)=>b.val-a.val);
   }
   const groups={};
-  BASE.forEach(inv=>{
+  activeBase().forEach(inv=>{
     const v=eurVal(inv);
     if(!groups[inv.sector]) groups[inv.sector]={val:0,items:[]};
     groups[inv.sector].val+=v;
@@ -1185,7 +1237,7 @@ function buildDonutChart(){
 function buildBarChart(){
   const el=document.getElementById('barchart');
   if(!el)return;
-  const rows=BASE.map(inv=>{
+  const rows=activeBase().map(inv=>{
     const dep=getTotalDeposited(inv.id);
     const val=getLastVal(inv.id);
     const pl=val-dep;
@@ -1275,30 +1327,35 @@ function buildGrowthChart(){
       </defs>
       <path class="fill-area" d="${areaD}" fill="url(#areaGrad)"/>
       <path class="line" d="${pathD}" fill="none" stroke="var(--teal)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+      <path class="line-shimmer" d="${pathD}" fill="none" stroke="var(--white)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="18 240"/>
       ${dots}
+      <circle r="4.5" fill="var(--teal)" style="filter:drop-shadow(0 0 8px var(--teal))">
+        <animateMotion dur="4.5s" repeatCount="indefinite" keyPoints="0;1;0" keyTimes="0;0.5;1" calcMode="linear" path="${pathD}"/>
+      </circle>
     </svg>
   `;
 }
 
 function buildKPIs(){
-  const eurPL=BASE.filter(i=>i.cur==='EUR').reduce((s,i)=>s+(getLastVal(i.id)-getTotalDeposited(i.id)),0);
-  const ghsPL=BASE.filter(i=>i.cur==='GHS').reduce((s,i)=>s+(getLastVal(i.id)-getTotalDeposited(i.id)),0);
-  const bestInv=BASE.slice().sort((a,b)=>{
+  const ab=activeBase();
+  const eurPL=ab.filter(i=>i.cur==='EUR').reduce((s,i)=>s+(getLastVal(i.id)-getTotalDeposited(i.id)),0);
+  const ghsPL=ab.filter(i=>i.cur==='GHS').reduce((s,i)=>s+(getLastVal(i.id)-getTotalDeposited(i.id)),0);
+  const bestInv=ab.slice().sort((a,b)=>{
     const pa=(getLastVal(a.id)-getTotalDeposited(a.id))/getTotalDeposited(a.id);
     const pb=(getLastVal(b.id)-getTotalDeposited(b.id))/getTotalDeposited(b.id);
     return pb-pa;
   })[0];
-  const bestPct=(getLastVal(bestInv.id)-getTotalDeposited(bestInv.id))/getTotalDeposited(bestInv.id);
-  const totalDep=BASE.filter(i=>i.cur==='EUR').reduce((s,i)=>s+getTotalDeposited(i.id),0);
-  const eurVal=BASE.filter(i=>i.cur==='EUR').reduce((s,i)=>s+getLastVal(i.id),0);
-  const ghsVal=BASE.filter(i=>i.cur==='GHS').reduce((s,i)=>s+getLastVal(i.id),0);
+  const bestPct=bestInv?(getLastVal(bestInv.id)-getTotalDeposited(bestInv.id))/getTotalDeposited(bestInv.id):0;
+  const totalDep=ab.filter(i=>i.cur==='EUR').reduce((s,i)=>s+getTotalDeposited(i.id),0);
+  const eurVal=ab.filter(i=>i.cur==='EUR').reduce((s,i)=>s+getLastVal(i.id),0);
+  const ghsVal=ab.filter(i=>i.cur==='GHS').reduce((s,i)=>s+getLastVal(i.id),0);
   const netWorthEUR=eurVal+(ghsVal*ghsToEurRate);
 
   const kpis=[
     {label:'Revolut P&L (EUR)',val:eurPL,  fmt:v=>(v>=0?'+':'')+fmt2(v),cls:colorClass(eurPL),  sub:'vs total deposited',k:'k0'},
     {label:'IC + Plus P&L (GHS)',val:ghsPL,fmt:v=>(v>=0?'+':'')+fmt2(v),cls:colorClass(ghsPL),sub:'vs total deposited',k:'k1'},
-    {label:'Best performer',val:bestPct,fmt:()=>bestInv.short,cls:'neu',sub:fmtPct(bestPct)+' return',k:'k2'},
-    {label:'EUR total invested',val:totalDep,fmt:v=>fmt2(v),cls:'neu',sub:'across '+BASE.filter(i=>i.cur==='EUR').length+' positions',k:'k3'},
+    {label:'Best performer',val:bestPct,fmt:()=>bestInv?bestInv.short:'—',cls:'neu',sub:fmtPct(bestPct)+' return',k:'k2'},
+    {label:'EUR total invested',val:totalDep,fmt:v=>fmt2(v),cls:'neu',sub:'across '+ab.filter(i=>i.cur==='EUR').length+' positions',k:'k3'},
     {label:'Net worth (€ equiv.)',val:netWorthEUR,fmt:v=>'€'+fmt2(v),cls:'neu',sub:'fx',k:'k4',fx:true},
   ];
   document.getElementById('kpi-strip').innerHTML=kpis.map((k,i)=>`
@@ -1339,7 +1396,7 @@ function sparklineSVG(id){
   return `<svg width="80" height="26" viewBox="0 0 ${w} ${h}"><polyline points="${pts}" fill="none" stroke="${stroke}" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
 }
 function buildDash(){
-  document.getElementById('dash-body').innerHTML=BASE.map(inv=>{
+  document.getElementById('dash-body').innerHTML=activeBase().map(inv=>{
     const dep=getTotalDeposited(inv.id);
     const val=getLastVal(inv.id);
     const pl=val-dep;
@@ -1360,6 +1417,7 @@ function buildDash(){
       <td class="${colorClass(pct)}">${fmtPct(pct)}<div class="pct-mini-bar" style="margin-left:auto"><div class="pct-mini-fill" data-w="${barPct}" style="background:${barColor}"></div></div></td>
       <td class="${trCls}" style="font-size:14px;text-align:right">${tr}</td>
       <td style="text-align:right">${sparklineSVG(inv.id)}</td>
+      <td style="text-align:right"><button class="btn btn-sm btn-ghost" onclick="openSellModal('${inv.id}')" title="Mark this investment as sold">💰 Sell</button></td>
     </tr>`;
   }).join('');
   requestAnimationFrame(()=>{
@@ -1387,12 +1445,12 @@ function buildPerf(){
       <div class="pct-bar"><div class="pct-bar-fill" style="width:${barW}%;background:${pct>=0?'var(--green)':'var(--red)'}"></div></div>
     </div>`;
   }
-  const eurSorted=[...BASE.filter(i=>i.cur==='EUR')].sort((a,b)=>{
+  const eurSorted=[...activeBase().filter(i=>i.cur==='EUR')].sort((a,b)=>{
     const pa=(getLastVal(a.id)-getTotalDeposited(a.id))/getTotalDeposited(a.id);
     const pb=(getLastVal(b.id)-getTotalDeposited(b.id))/getTotalDeposited(b.id);
     return pb-pa;
   });
-  const ghsSorted=[...BASE.filter(i=>i.cur==='GHS')].sort((a,b)=>{
+  const ghsSorted=[...activeBase().filter(i=>i.cur==='GHS')].sort((a,b)=>{
     const pa=(getLastVal(a.id)-getTotalDeposited(a.id))/getTotalDeposited(a.id);
     const pb=(getLastVal(b.id)-getTotalDeposited(b.id))/getTotalDeposited(b.id);
     return pb-pa;
@@ -1407,12 +1465,12 @@ function setPeriod(p,el){
   document.querySelectorAll('.period-pill').forEach((b,i)=>b.classList.toggle('active',i===p));
 }
 function buildValTable(){
-  document.getElementById('val-body').innerHTML=BASE.map(inv=>{
+  document.getElementById('val-body').innerHTML=activeBase().map(inv=>{
     const last=getLastVal(inv.id);
     const dep=getTotalDeposited(inv.id);
     return `<tr class="val-row" data-id="${inv.id}" ondragover="rowDragOver(event)" ondrop="event.preventDefault()">
       <td class="drag-handle" draggable="true" ondragstart="rowDragStart(event)" ondragend="rowDragEnd(event)" title="Drag to reorder">⠿</td>
-      <td><div class="inv-name">${inv.name}</div><div class="inv-meta"><span class="badge badge-${inv.cur.toLowerCase()}">${inv.cur}</span> ${inv.platform}</div></td>
+      <td style="text-align:left"><div class="inv-name">${inv.name}</div><div class="inv-meta"><span class="badge badge-${inv.cur.toLowerCase()}">${inv.cur}</span> ${inv.platform}</div></td>
       <td class="muted">${fmt2(dep)}</td>
       <td class="muted" id="vl_${inv.id}">${fmt2(last)}</td>
       <td><input type="number" class="val-input" id="vi_${inv.id}" placeholder="${fmt2(last)}" step="0.01" oninput="calcChg('${inv.id}')" onkeydown="nextRow(event,'${inv.id}')"></td>
@@ -1464,6 +1522,65 @@ function applyInvOrder(){
       return ra-rb;
     });
   }catch(err){}
+}
+
+// ── Sold investments ──────────────────────────────────────────
+let sellTargetId = null;
+function openSellModal(id){
+  sellTargetId = id;
+  const inv = BASE.find(i=>i.id===id);
+  if(!inv) return;
+  document.getElementById('sell-modal-name').textContent = inv.name;
+  document.getElementById('sell-date').value = today();
+  document.getElementById('sell-price').value = fmt2(getLastVal(id));
+  document.getElementById('sell-modal').classList.add('open');
+}
+function closeSellModal(){
+  document.getElementById('sell-modal').classList.remove('open');
+  sellTargetId = null;
+}
+function confirmSell(){
+  if(!sellTargetId) return;
+  const date = document.getElementById('sell-date').value;
+  const price = parseFloat(document.getElementById('sell-price').value);
+  if(!date || isNaN(price)){ showToast('Enter a date and sale amount', true); return; }
+  soldInvs[sellTargetId] = { date, price };
+  try{ localStorage.setItem('_sold_invs', JSON.stringify(soldInvs)); }catch(e){}
+  closeSellModal();
+  buildKPIs(); buildDash(); buildValTable(); buildSoldList();
+  showToast('Marked as sold — see Total Profits for the record');
+}
+function restoreInvestment(id){
+  delete soldInvs[id];
+  try{ localStorage.setItem('_sold_invs', JSON.stringify(soldInvs)); }catch(e){}
+  buildKPIs(); buildDash(); buildValTable(); buildSoldList();
+  showToast('Restored to active portfolio');
+}
+function buildSoldList(){
+  const el = document.getElementById('sold-list');
+  if(!el) return;
+  const ids = Object.keys(soldInvs);
+  if(!ids.length){
+    el.innerHTML = `<p style="color:var(--muted);font-size:13px">No sold investments yet — use the 💰 Sell button on the Dashboard table when you close out a position.</p>`;
+    return;
+  }
+  el.innerHTML = ids.map(id=>{
+    const inv = BASE.find(i=>i.id===id);
+    if(!inv) return '';
+    const s = soldInvs[id];
+    const dep = getTotalDeposited(id);
+    const pl = s.price - dep;
+    const pct = dep>0 ? pl/dep : 0;
+    return `<div class="perf-card">
+      <div class="perf-name">${inv.name}</div>
+      <div class="perf-meta">Sold ${s.date} · ${inv.platform} · ${inv.sector}</div>
+      <div class="perf-stat"><span class="perf-stat-label">Deposited</span><span class="perf-stat-val muted">${fmt2(dep)} ${inv.cur}</span></div>
+      <div class="perf-stat"><span class="perf-stat-label">Sale proceeds</span><span class="perf-stat-val">${fmt2(s.price)} ${inv.cur}</span></div>
+      <div class="perf-stat"><span class="perf-stat-label">Final P&L</span><span class="perf-stat-val ${colorClass(pl)}">${pl>=0?'+':''}${fmt2(pl)}</span></div>
+      <div class="perf-stat"><span class="perf-stat-label">% Return</span><span class="perf-stat-val ${colorClass(pct)}">${fmtPct(pct)}</span></div>
+      <button class="btn btn-sm" style="margin-top:.7rem;width:100%" onclick="restoreInvestment('${id}')">↺ Restore to active</button>
+    </div>`;
+  }).join('');
 }
 function calcChg(id){
   const v=parseFloat(document.getElementById('vi_'+id).value);
